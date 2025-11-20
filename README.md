@@ -29,43 +29,23 @@ Both implementations simulate a "hunter" (red ball) pursuing a "target" (blue ba
 
 #### Course Notebooks (15-Week Curriculum)
 
-**Module I: Introduction & Foundations**
-- **Week 1:** Introduction to Autonomy
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week01_introduction_to_autonomy.ipynb)
-- **Week 2:** Vehicle Dynamics & Kinematics
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week02_vehicle_dynamics_kinematics.ipynb)
-- **Week 3:** Control Theory & Actuation
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week03_control_theory_actuation.ipynb)
-
-**Module II: Perception & Localization**
-- **Week 4:** Sensor Technologies & Fusion
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week04_sensor_technologies_fusion.ipynb)
-- **Week 5:** Deep Learning for Perception
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week05_deep_learning_perception.ipynb)
-- **Week 6:** Probabilistic State Estimation
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week06_probabilistic_state_estimation.ipynb)
-- **Week 7:** Localization and Mapping
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week07_localization_mapping.ipynb)
-
-**Module III: Planning & Decision Making**
-- **Week 8:** Mission & Behavior Planning
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week08_mission_behavior_planning.ipynb)
-- **Week 9:** Local Motion Planning
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week09_local_motion_planning.ipynb)
-- **Week 10:** Trajectory Optimization
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week10_trajectory_optimization.ipynb)
-- **Week 11:** Prediction and Interaction
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week11_prediction_interaction.ipynb)
-
-**Module IV: Safety, Testing, & The Future**
-- **Week 12:** Functional Safety & Redundancy
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week12_functional_safety_redundancy.ipynb)
-- **Week 13:** Testing, Validation, & Ethics
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week13_testing_validation_ethics.ipynb)
-- **Week 14:** Connected & Cooperative Driving
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week14_connected_cooperative_driving.ipynb)
-- **Week 15:** Final Project Presentation
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week15_final_project_presentation.ipynb)
+| Module | Week | Topic | Open in Colab |
+|--------|------|-------|---------------|
+| **Module I: Introduction & Foundations** | 1 | Introduction to Autonomy | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week01_introduction_to_autonomy.ipynb) |
+| | 2 | Vehicle Dynamics & Kinematics | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week02_vehicle_dynamics_kinematics.ipynb) |
+| | 3 | Control Theory & Actuation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week03_control_theory_actuation.ipynb) |
+| **Module II: Perception & Localization** | 4 | Sensor Technologies & Fusion | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week04_sensor_technologies_fusion.ipynb) |
+| | 5 | Deep Learning for Perception | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week05_deep_learning_perception.ipynb) |
+| | 6 | Probabilistic State Estimation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week06_probabilistic_state_estimation.ipynb) |
+| | 7 | Localization and Mapping | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week07_localization_mapping.ipynb) |
+| **Module III: Planning & Decision Making** | 8 | Mission & Behavior Planning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week08_mission_behavior_planning.ipynb) |
+| | 9 | Local Motion Planning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week09_local_motion_planning.ipynb) |
+| | 10 | Trajectory Optimization | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week10_trajectory_optimization.ipynb) |
+| | 11 | Prediction and Interaction | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week11_prediction_interaction.ipynb) |
+| **Module IV: Safety, Testing, & The Future** | 12 | Functional Safety & Redundancy | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week12_functional_safety_redundancy.ipynb) |
+| | 13 | Testing, Validation, & Ethics | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week13_testing_validation_ethics.ipynb) |
+| | 14 | Connected & Cooperative Driving | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week14_connected_cooperative_driving.ipynb) |
+| | 15 | Final Project Presentation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week15_final_project_presentation.ipynb) |
 
 ### Documentation
 - **`CLAUDE.md`** - Technical documentation for developers and Claude Code
