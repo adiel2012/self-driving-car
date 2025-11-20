@@ -20,7 +20,10 @@ Both implementations simulate a "hunter" (red ball) pursuing a "target" (blue ba
 
 ### Jupyter Notebooks (Python-Based)
 - **`kalman_ball_chase.ipynb`** - Interactive notebook with Kalman Filter animation
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/kalman_ball_chase.ipynb)
+
 - **`pid_ball_chase.ipynb`** - Interactive notebook with PID Controller animation
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/pid_ball_chase.ipynb)
 
 ### Documentation
 - **`CLAUDE.md`** - Technical documentation for developers and Claude Code
@@ -44,7 +47,7 @@ xdg-open kalman_ball_chase.html
 
 No build process, no dependencies, no server required!
 
-### Option 2: Jupyter Notebooks
+### Option 2: Jupyter Notebooks (Local)
 
 Requires Python with Jupyter:
 
@@ -57,6 +60,10 @@ jupyter notebook kalman_ball_chase.ipynb
 ```
 
 Then execute all cells to see the interactive animation.
+
+### Option 3: Google Colab (Cloud-Based, No Installation)
+
+Click the "Open in Colab" badges above to run the notebooks directly in your browser with zero setup!
 
 ## 🧮 Algorithms Explained
 
