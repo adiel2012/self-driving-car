@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalman Filter Ball Chase</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .info {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            max-width: 900px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        canvas {
+            border: 3px solid #333;
+            border-radius: 8px;
+            background: #1a1a2e;
+            display: block;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 280px;
+        }
+        
+        .panel {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .panel h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #555;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stat:last-child {
+            border-bottom: none;
+        }
+        
+        .label {
+            font-weight: 600;
+        }
+        
+        .value {
+            font-weight: bold;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .slider-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .slider-value {
+            font-weight: bold;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 13px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .status.caught {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+            color: #e65100;
+        }
+        
+        .math-section {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .math-section h2 {
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        .math-section h3 {
+            color: #667eea;
+            margin-top: 25px;
+        }
+        
+        .math-section p {
+            color: #555;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+        
+        .math-box {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .math-box code {
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .derivation {
+            background: #fff9e6;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .derivation p {
+            color: #333;
+            margin: 8px 0;
+        }
+        
+        .step {
+            margin: 12px 0 12px 20px;
+            padding-left: 15px;
+            border-left: 2px solid #ff9800;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+        
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        table th {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚽ Kalman Filter Ball Chase</h1>
+    <div class="info">
+        <p>The red ball uses a Kalman filter to predict where the blue ball will be. 
+        The blue ball moves in a circular path while the Kalman filter learns its trajectory and guides the red ball to intercept it.
+        Adjust the measurement noise to see how the filter adapts to sensor uncertainty!</p>
+    </div>
+    
+    <div class="container" id="mainContainer">
+        <canvas id="canvas" width="700" height="700"></canvas>
+        
+        <div class="sidebar">
+            <div class="status" id="status">
+                🎯 Chasing...
+            </div>
+            
+            <div class="panel">
+                <h3>Blue Ball (Target)</h3>
+                <div class="stat">
+                    <span class="label">Position X:</span>
+                    <span class="value" id="blueX">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Position Y:</span>
+                    <span class="value" id="blueY">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Circle Radius:</span>
+                    <span class="value" id="radius">0.0</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>Red Ball (Hunter)</h3>
+                <div class="stat">
+                    <span class="label">Position X:</span>
+                    <span class="value" id="redX">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Position Y:</span>
+                    <span class="value" id="redY">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Distance:</span>
+                    <span class="value" id="distance">0.0</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>Kalman Filter</h3>
+                <div class="stat">
+                    <span class="label">Predicted X:</span>
+                    <span class="value" id="predictX">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Predicted Y:</span>
+                    <span class="value" id="predictY">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Prediction Error:</span>
+                    <span class="value" id="predError">0.0</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="slider-group">
+                    <label>Measurement Noise (σ²)</label>
+                    <input type="range" id="noiseSlider" min="1" max="150" value="40">
+                    <span class="slider-value" id="noiseValue">40</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="slider-group">
+                    <label>Circle Radius (R)</label>
+                    <input type="range" id="radiusSlider" min="50" max="200" value="120">
+                    <span class="slider-value" id="radiusValue">120</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>Legend</h3>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3498db;"></div>
+                        <span>Blue Ball (Target)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e74c3c;"></div>
+                        <span>Red Ball (Hunter)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2ecc71;"></div>
+                        <span>Kalman Prediction</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(255,255,255,0.3);"></div>
+                        <span>Circular Path</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="resetBtn">Reset</button>
+                <button id="pauseBtn">Pause</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="math-section">
+        <h2>📐 Kalman Filter: Mathematical Foundation & Derivation</h2>
+        
+        <h3>0. Intuitive Understanding First</h3>
+        <p>
+            Imagine you're watching a ball move on a noisy camera feed. Each frame is blurry and unreliable. 
+            But you know the ball moves smoothly at roughly constant velocity. The Kalman filter is essentially asking:
+            <br><br>
+            <strong>"Given my prediction of where the ball should be, and a noisy measurement of where it actually is,
+            what's my best guess of the true position?"</strong>
+            <br><br>
+            The genius of Kalman is that it automatically learns:
+        </p>
+        <ul>
+            <li>How much to trust the measurement (if it's very noisy, trust it less)</li>
+            <li>How much to trust the prediction (if the system is predictable, trust it more)</li>
+            <li>How these trust levels evolve over time (learning happens automatically)</li>
+        </ul>
+        
+        <h3>1. Introduction to the Kalman Filter</h3>
+        <p>
+            The Kalman filter is an optimal recursive algorithm for estimating the state of a linear dynamic system 
+            in the presence of noise. It answers a fundamental question in engineering and science:
+            <br><br>
+            <strong>How do we extract the true signal from noisy observations while accounting for system dynamics?</strong>
+            <br><br>
+            Key insight: It doesn't just react to measurements—it predicts the future, then corrects that prediction when new measurements arrive.
+        </p>
+        
+        <h3>2. The Core Idea: Prediction + Correction</h3>
+        <p>
+            The Kalman filter works in two alternating phases, like a pendulum swinging between prediction and reality:
+        </p>
+        <ul>
+            <li><strong>PREDICT:</strong> "Based on physics and past behavior, where should the ball be now?"</li>
+            <li><strong>UPDATE:</strong> "I measured it at position Z. My prediction was X. Let me blend these intelligently."</li>
+        </ul>
+        <p>
+            This cycle repeats for every new measurement, creating a smooth, optimal estimate.
+        </p>
+        
+        <h3>3. Problem Formulation</h3>
+        <p>
+            We model our system with two fundamental equations that describe reality:
+        </p>
+        
+        <div class="math-box">
+            <strong>PROCESS MODEL (How the system evolves):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{x}(k) = \mathbf{F} \cdot \mathbf{x}(k-1) + \mathbf{w}(k)$$
+            </div>
+            <strong>MEASUREMENT MODEL (What we observe):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{z}(k) = \mathbf{H} \cdot \mathbf{x}(k) + \mathbf{v}(k)$$
+            </div>
+        </div>
+        
+        <p>
+            <strong>Intuition:</strong> The process model says the current state is determined by the previous state 
+            (updated by matrix F) plus random noise w. The measurement model says we can only observe the state through 
+            a sensor that adds its own noise v.
+        </p>
+        
+        <p><strong>Variable Definitions:</strong></p>
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Meaning</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td>$$\mathbf{x}(k)$$</td>
+                <td>TRUE state at time k (what we want to know)</td>
+                <td>Ball's actual position [x, y, vx, vy]</td>
+            </tr>
+            <tr>
+                <td>$$\mathbf{z}(k)$$</td>
+                <td>MEASURED state at time k (what we observe)</td>
+                <td>Noisy camera reading of position</td>
+            </tr>
+            <tr>
+                <td>$$\mathbf{F}$$</td>
+                <td>State transition: tells how state evolves</td>
+                <td>Physics: new_pos = old_pos + velocity·dt</td>
+            </tr>
+            <tr>
+                <td>$$\mathbf{H}$$</td>
+                <td>Measurement matrix: maps state to measurements</td>
+                <td>Sensor measures position but not velocity</td>
+            </tr>
+            <tr>
+                <td>$$\mathbf{w}(k)$$</td>
+                <td>Process noise: uncertainty in physics model</td>
+                <td>Unexpected wind gust affecting ball</td>
+            </tr>
+            <tr>
+                <td>$$\mathbf{v}(k)$$</td>
+                <td>Measurement noise: sensor error</td>
+                <td>Camera blurriness</td>
+            </tr>
+        </table>
+        
+        <h3>4. How Noise Works: The Gaussian Assumption</h3>
+        <p>
+            Both process and measurement noise are assumed to be white Gaussian noise. What does this mean intuitively?
+        </p>
+        <ul>
+            <li><strong>Gaussian:</strong> Random errors are normally distributed (bell curve)</li>
+            <li><strong>White:</strong> Errors are independent at each time step (no correlation)</li>
+            <li><strong>Zero-mean:</strong> On average, there's no systematic bias—sometimes too high, sometimes too low</li>
+        </ul>
+        
+        <div class="math-box">
+            <code>
+            w(k) ~ N(0, Q)  : Process noise distributed as normal with covariance Q<br>
+            v(k) ~ N(0, R)  : Measurement noise distributed as normal with covariance R<br>
+            <br>
+            These are specified as:<br>
+            Q = Process noise covariance (how much the true system deviates from model)<br>
+            R = Measurement noise covariance (how much the sensor is wrong)<br>
+            </code>
+        </div>
+        
+        <h3>5. The Kalman Filter Algorithm: Two Phase Dance</h3>
+        <p>
+            The magic happens by alternating between two phases. Think of it like a conversation:
+            "Based on my model, you should be here (PREDICT). Oh, you're actually there? Let me update (UPDATE)."
+        </p>
+        
+        <h3>5.1 PREDICTION PHASE: "Where should it be?"</h3>
+        <p>
+            We project the state forward using the physics model. Since we're uncertain about the model (process noise),
+            our uncertainty (covariance) also grows. It's like throwing a ball—the further in the future, the more uncertain you are.
+        </p>
+        
+        <div class="math-box">
+            <strong>State Prediction (Apply Physics):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\hat{\mathbf{x}}^-(k) = \mathbf{F} \cdot \hat{\mathbf{x}}(k-1)$$
+            </div>
+            <strong>Covariance Prediction (Grow Uncertainty):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{P}^-(k) = \mathbf{F} \cdot \mathbf{P}(k-1) \cdot \mathbf{F}^T + \mathbf{Q}$$
+            </div>
+        </div>
+        
+        <p>
+            <strong>What this means:</strong>
+        </p>
+        <ul>
+            <li><strong>x̂⁻(k):</strong> "Based on where we were and how fast we were moving, here's our prediction"</li>
+            <li><strong>P⁻(k):</strong> "Here's how uncertain we are about that prediction"</li>
+            <li><strong>The + Q part:</strong> Adds model uncertainty. If Q is large, we're saying the model might be wrong</li>
+        </ul>
+        
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Meaning</th>
+                <th>Intuition</th>
+            </tr>
+            <tr>
+                <td>x̂⁻(k)</td>
+                <td>Predicted state (before seeing measurement)</td>
+                <td>Our best physics-based guess</td>
+            </tr>
+            <tr>
+                <td>P⁻(k)</td>
+                <td>Predicted covariance (uncertainty grows)</td>
+                <td>We're less confident the further we predict</td>
+            </tr>
+            <tr>
+                <td>F·P(k-1)·Fᵀ</td>
+                <td>How uncertainty transforms</td>
+                <td>Uncertainty "stretches" through the physics model</td>
+            </tr>
+            <tr>
+                <td>+ Q</td>
+                <td>Add model noise</td>
+                <td>Physics isn't perfect; things can happen</td>
+            </tr>
+        </table>
+        
+        <div class="derivation">
+            <p><strong>Why This Formula? A Derivation:</strong></p>
+            <p>
+                <strong>Goal:</strong> Express the predicted covariance P⁻(k) in terms of the previous covariance P(k-1).
+                Covariance is the "spread" or uncertainty—we need to track how this spreads through time.
+            </p>
+            <div class="step">
+                <p><strong>Step 1:</strong> Define the prediction error as the difference between true and estimated state:</p>
+                <p style="margin-left: 20px;">e⁻(k) = x(k) - x̂⁻(k)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 2:</strong> Substitute the true state from the process model:</p>
+                <p style="margin-left: 20px;">x(k) = F·x(k-1) + w(k)</p>
+                <p style="margin-left: 20px;">e⁻(k) = F·x(k-1) + w(k) - F·x̂(k-1)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 3:</strong> Factor out the transition matrix:</p>
+                <p style="margin-left: 20px;">e⁻(k) = F·[x(k-1) - x̂(k-1)] + w(k)</p>
+                <p style="margin-left: 20px;">e⁻(k) = F·e(k-1) + w(k)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 4:</strong> Covariance is the expected value of error times error transpose:</p>
+                <p style="margin-left: 20px;">P⁻(k) = E[e⁻(k)·e⁻(k)ᵀ]</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 5:</strong> Expand using our expression for e⁻(k):</p>
+                <p style="margin-left: 20px;">P⁻(k) = E[(F·e(k-1) + w(k))·(F·e(k-1) + w(k))ᵀ]</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 6:</strong> Key assumption—noise w(k) is independent of past errors e(k-1):</p>
+                <p style="margin-left: 20px;">The cross terms E[F·e(k-1)·w(k)ᵀ] and E[w(k)·e(k-1)ᵀ·Fᵀ] vanish</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 7:</strong> Expand the remaining terms:</p>
+                <p style="margin-left: 20px;">P⁻(k) = E[F·e(k-1)·e(k-1)ᵀ·Fᵀ] + E[w(k)·w(k)ᵀ]</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 8:</strong> Apply expectation operator and recognize covariances:</p>
+                <p style="margin-left: 20px;">E[F·e(k-1)·e(k-1)ᵀ·Fᵀ] = F·E[e(k-1)·e(k-1)ᵀ]·Fᵀ = F·P(k-1)·Fᵀ</p>
+                <p style="margin-left: 20px;">E[w(k)·w(k)ᵀ] = Q</p>
+            </div>
+            <div class="step">
+                <p><strong>Final Result:</strong></p>
+                <p style="margin-left: 20px; color: #667eea; font-weight: bold;">P⁻(k) = F·P(k-1)·Fᵀ + Q</p>
+            </div>
+        </div>
+        
+        <h3>5.2 UPDATE PHASE: "Where is it really?"</h3>
+        <p>
+            Now we get a measurement from the sensor. Even though it's noisy, it tells us something real.
+            We blend our prediction with the measurement, weighting each by how much we trust it.
+            This is where the "learning" magic happens.
+        </p>
+        
+        <div class="math-box">
+            <strong>Innovation (The Surprise):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{y}(k) = \mathbf{z}(k) - \mathbf{H} \cdot \hat{\mathbf{x}}^-(k)$$
+            </div>
+            <strong>Innovation Covariance (How surprising?):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{S}(k) = \mathbf{H} \cdot \mathbf{P}^-(k) \cdot \mathbf{H}^T + \mathbf{R}$$
+            </div>
+            <strong>Kalman Gain (The Blending Weight):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{K}(k) = \mathbf{P}^-(k) \cdot \mathbf{H}^T \cdot \mathbf{S}^{-1}(k)$$
+            </div>
+            <strong>Updated State (The Blend):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\hat{\mathbf{x}}(k) = \hat{\mathbf{x}}^-(k) + \mathbf{K}(k) \cdot \mathbf{y}(k)$$
+            </div>
+            <strong>Updated Covariance (New Confidence):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{P}(k) = (\mathbf{I} - \mathbf{K}(k) \cdot \mathbf{H}) \cdot \mathbf{P}^-(k)$$
+            </div>
+        </div>
+        
+        <p>
+            <strong>Intuitive explanation:</strong>
+        </p>
+        <ul>
+            <li><strong>Innovation y(k):</strong> The difference between what we measured and what we predicted. If this is big, the measurement surprised us.</li>
+            <li><strong>Kalman Gain K(k):</strong> THE MOST IMPORTANT VALUE. It decides: "How much should I believe the measurement vs. my prediction?"
+                <ul>
+                    <li>If K is close to 0: Trust prediction more (measurement is unreliable)</li>
+                    <li>If K is close to 1: Trust measurement more (prediction was off)</li>
+                </ul>
+            </li>
+            <li><strong>Updated State x̂(k):</strong> We adjust our prediction by a fraction of the innovation. Not fully jumping to the measurement, but adjusting.</li>
+            <li><strong>Updated Covariance P(k):</strong> After seeing the measurement, we're more confident. Covariance shrinks (uncertainty decreases).</li>
+        </ul>
+        
+        <p>Where:</p>
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Meaning</th>
+            </tr>
+            <tr>
+                <td>y(k)</td>
+                <td>Innovation or measurement residual</td>
+            </tr>
+            <tr>
+                <td>S(k)</td>
+                <td>Innovation covariance</td>
+            </tr>
+            <tr>
+                <td>K(k)</td>
+                <td>Kalman gain matrix</td>
+            </tr>
+            <tr>
+                <td>x̂(k)</td>
+                <td>Updated state estimate (a posteriori)</td>
+            </tr>
+            <tr>
+                <td>P(k)</td>
+                <td>Updated state covariance (a posteriori)</td>
+            </tr>
+        </table>
+        
+        <div class="derivation">
+            <p><strong>Derivation of Kalman Gain (Finding the Optimal Blend):</strong></p>
+            <p>
+                <strong>The Goal:</strong> Find the Kalman gain K that minimizes the mean squared error.
+                We want the estimate to be as close to the truth as possible, on average.
+            </p>
+            <div class="step">
+                <p><strong>Step 1:</strong> Define the cost function (mean squared error):</p>
+                <p style="margin-left: 20px;">J(K) = E[||x(k) - x̂(k)||²] = trace(P(k))</p>
+                <p style="margin-left: 20px; font-size: 12px;">(We want to minimize the total uncertainty)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 2:</strong> Propose the update law (linear combination of prediction and measurement):</p>
+                <p style="margin-left: 20px;">x̂(k) = x̂⁻(k) + K·[z(k) - H·x̂⁻(k)]</p>
+                <p style="margin-left: 20px; font-size: 12px;">K is the gain matrix we need to optimize</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 3:</strong> Express the estimation error:</p>
+                <p style="margin-left: 20px;">e(k) = x(k) - x̂(k)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 4:</strong> Substitute the measurement model z(k) = H·x(k) + v(k):</p>
+                <p style="margin-left: 20px;">e(k) = x(k) - x̂⁻(k) - K·[H·x(k) + v(k) - H·x̂⁻(k)]</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 5:</strong> Rearrange (grouping terms with prediction error e⁻ and noise terms):</p>
+                <p style="margin-left: 20px;">e(k) = [I - K·H]·[x(k) - x̂⁻(k)] - K·v(k)</p>
+                <p style="margin-left: 20px;">e(k) = [I - K·H]·e⁻(k) - K·v(k)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 6:</strong> Calculate covariance of error (using independence of e⁻ and v):</p>
+                <p style="margin-left: 20px;">P(k) = E[e(k)·eᵀ(k)]</p>
+                <p style="margin-left: 20px;">P(k) = [I - K·H]·P⁻(k)·[I - K·H]ᵀ + K·R·Kᵀ</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 7:</strong> To minimize, take the derivative with respect to K and set to zero:</p>
+                <p style="margin-left: 20px;">dJ/dK = 0</p>
+                <p style="margin-left: 20px; font-size: 12px;">This is a matrix calculus operation (minimizes trace of P(k))</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 8:</strong> Solving the optimization yields:</p>
+                <p style="margin-left: 20px; color: #667eea; font-weight: bold;">K(k) = P⁻(k)·Hᵀ·[H·P⁻(k)·Hᵀ + R]⁻¹</p>
+            </div>
+            <div class="step">
+                <p><strong>Interpretation of the Kalman Gain:</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Numerator P⁻(k)·Hᵀ:</strong> Prediction uncertainty scaled by measurement sensitivity</li>
+                    <li><strong>Denominator H·P⁻(k)·Hᵀ + R:</strong> Total measurement uncertainty (prediction + sensor noise)</li>
+                    <li><strong>Result:</strong> A ratio that naturally balances trust in prediction vs measurement</li>
+                </ul>
+            </div>
+        </div>
+        
+        <h3>5.3 The Complete Filter Loop</h3>
+        <p>
+            Notice the beautiful cycle: as we gain information (P shrinks), our Kalman gain automatically adapts. 
+            The filter learns! Initially we might heavily weight measurements, but as we understand the system better, 
+            we trust our predictions more.
+        </p>
+        
+        <h3>6. Application to 2D Ball Tracking in Our Animation</h3>
+        <p>
+            Now let's see how all these formulas apply to our specific problem: tracking a blue ball 
+            moving in a circle while a red ball tries to catch it.
+        </p>
+        
+        <h3>6.1 Understanding Matrix Dimensions</h3>
+        <p>
+            Matrix dimensions are crucial to understanding the Kalman filter. Let's be very explicit about each dimension.
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>DIMENSION REFERENCE:</strong><br>
+            <br>
+            n = state dimension = 4 (position and velocity in 2D)<br>
+            m = measurement dimension = 2 (only position, not velocity)<br>
+            <br>
+            <strong>State Vector x(k):</strong> (4×1)<br>
+            x(k) = | x_pos |<br>
+                   | y_pos |<br>
+                   | v_x   |<br>
+                   | v_y   |<br>
+            <br>
+            Example: x(k) = | 350.5 |  (at frame k)<br>
+                            | 200.3 |<br>
+                            |   2.1 |<br>
+                            |  -1.5 |<br>
+            <br>
+            <strong>Measurement Vector z(k):</strong> (2×1)<br>
+            z(k) = | x_measured |<br>
+                   | y_measured |<br>
+            <br>
+            Example: z(k) = | 351.2 |  (noisy camera reading)<br>
+                            | 199.8 |<br>
+            </code>
+        </div>
+        
+        <h3>6.2 All Matrices and Their Dimensions</h3>
+        <p>
+            Here's a complete picture of every matrix and vector in the Kalman filter, with dimensions labeled.
+        </p>
+        
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Dimensions</th>
+                <th>Name</th>
+                <th>Meaning</th>
+            </tr>
+            <tr>
+                <td><strong>x(k)</strong></td>
+                <td>4×1</td>
+                <td>State vector</td>
+                <td>What we want to estimate: [x, y, vx, vy]ᵀ</td>
+            </tr>
+            <tr>
+                <td><strong>z(k)</strong></td>
+                <td>2×1</td>
+                <td>Measurement vector</td>
+                <td>What sensor provides: [x_noisy, y_noisy]ᵀ</td>
+            </tr>
+            <tr>
+                <td><strong>F</strong></td>
+                <td>4×4</td>
+                <td>State transition matrix</td>
+                <td>How state evolves: x(k) = F·x(k-1)</td>
+            </tr>
+            <tr>
+                <td><strong>H</strong></td>
+                <td>2×4</td>
+                <td>Measurement matrix</td>
+                <td>Extracts measured components: z = H·x</td>
+            </tr>
+            <tr>
+                <td><strong>P(k)</strong></td>
+                <td>4×4</td>
+                <td>State covariance</td>
+                <td>Uncertainty: how confident in x(k)</td>
+            </tr>
+            <tr>
+                <td><strong>Q</strong></td>
+                <td>4×4</td>
+                <td>Process noise covariance</td>
+                <td>Model uncertainty: how much model can be wrong</td>
+            </tr>
+            <tr>
+                <td><strong>R</strong></td>
+                <td>2×2</td>
+                <td>Measurement noise covariance</td>
+                <td>Sensor uncertainty: how noisy is measurement</td>
+            </tr>
+            <tr>
+                <td><strong>K(k)</strong></td>
+                <td>4×2</td>
+                <td>Kalman gain</td>
+                <td>How much to blend: x = x_pred + K·(z - H·x_pred)</td>
+            </tr>
+            <tr>
+                <td><strong>y(k)</strong></td>
+                <td>2×1</td>
+                <td>Innovation</td>
+                <td>Measurement surprise: z(k) - H·x̂⁻(k)</td>
+            </tr>
+            <tr>
+                <td><strong>S(k)</strong></td>
+                <td>2×2</td>
+                <td>Innovation covariance</td>
+                <td>Expected measurement surprise size</td>
+            </tr>
+        </table>
+        
+        <h3>6.3 Why These Specific Dimensions?</h3>
+        
+        <div class="derivation">
+            <p><strong>Dimension Logic:</strong></p>
+            <div class="step">
+                <p><strong>State vector x is 4×1:</strong> We track 4 things (x, y, vx, vy)</p>
+            </div>
+            <div class="step">
+                <p><strong>Measurement z is 2×1:</strong> Camera only measures 2 things (x position, y position)</p>
+            </div>
+            <div class="step">
+                <p><strong>F is 4×4:</strong> Takes 4D state and produces 4D state</p>
+                <p style="margin-left: 20px; font-size: 12px;">x(k) = F·x(k-1) means 4×4 matrix times 4×1 vector = 4×1 ✓</p>
+            </div>
+            <div class="step">
+                <p><strong>H is 2×4:</strong> Takes 4D state and extracts 2D measurement</p>
+                <p style="margin-left: 20px; font-size: 12px;">z = H·x means 2×4 matrix times 4×1 vector = 2×1 ✓</p>
+            </div>
+            <div class="step">
+                <p><strong>P is 4×4:</strong> Covariance of 4D state space</p>
+                <p style="margin-left: 20px; font-size: 12px;">Covariance matrix is always square (nxn for n-dimensional state)</p>
+            </div>
+            <div class="step">
+                <p><strong>Q is 4×4:</strong> Noise in 4D state space</p>
+            </div>
+            <div class="step">
+                <p><strong>R is 2×2:</strong> Noise in 2D measurement space</p>
+            </div>
+            <div class="step">
+                <p><strong>K is 4×2:</strong> Maps 2D innovation to 4D state correction</p>
+                <p style="margin-left: 20px; font-size: 12px;">x = x + K·y means 4×1 = 4×1 + (4×2 matrix times 2×1 vector) = 4×1 + 4×1 ✓</p>
+            </div>
+        </div>
+        <p>
+            We assume the ball moves with constant velocity. This is our "physics model"—it won't be perfect 
+            (that's why we have process noise Q), but it's good enough for short time horizons.
+        </p>
+        
+        <div class="math-box">
+            <strong>State Transition Matrix $$\mathbf{F}$$ (Dimensions: 4×4):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{F} = \begin{bmatrix} 1 & 0 & \Delta t & 0 \\ 0 & 1 & 0 & \Delta t \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+            </div>
+            <p style="text-align: center; font-size: 12px;">Where $$\Delta t = 0.016$$ seconds (one frame at 60 fps)</p>
+            
+            <strong>Matrix multiplication breakdown:</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{x}(k) = \mathbf{F} \cdot \mathbf{x}(k-1) \quad (4×1 = 4×4 × 4×1) \quad ✓$$
+            </div>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\begin{bmatrix} x_{\text{new}} \\ y_{\text{new}} \\ v_{x,\text{new}} \\ v_{y,\text{new}} \end{bmatrix} = \begin{bmatrix} 1 & 0 & \Delta t & 0 \\ 0 & 1 & 0 & \Delta t \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} x_{\text{old}} \\ y_{\text{old}} \\ v_{x,\text{old}} \\ v_{y,\text{old}} \end{bmatrix}$$
+            </div>
+        </div>
+        
+        <h3>6.3 What We Measure: Measurement Matrix H</h3>
+        <p>
+            Our sensor (the camera) can only measure position, not velocity. The measurement matrix H 
+            extracts only the position components from our full state.
+        </p>
+        
+        <div class="math-box">
+            <strong>Measurement Matrix $$\mathbf{H}$$ (Dimensions: 2×4):</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{H} = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \end{bmatrix}$$
+            </div>
+            
+            <strong>What this multiplication does:</strong>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\mathbf{z} = \mathbf{H} \cdot \mathbf{x} \quad (2×1 = 2×4 × 4×1) \quad ✓$$
+            </div>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\begin{bmatrix} z_x \\ z_y \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \end{bmatrix} \begin{bmatrix} x \\ y \\ v_x \\ v_y \end{bmatrix} = \begin{bmatrix} x \\ y \end{bmatrix}$$
+            </div>
+            
+            <p style="text-align: center; font-size: 12px;"><strong>Key insight:</strong> H is a "selector" matrix that extracts only position components</p>
+        </div>
+        
+        <h3>6.4 Noise Covariance Matrices: P, Q, and R</h3>
+        <p>
+            Covariance matrices describe uncertainty. They're always square (diagonal dimensions).
+            For our 4D state, we need a 4×4 covariance matrix. For our 2D measurements, we need a 2×2 covariance matrix.
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>State Covariance P(k) (Dimensions: 4×4)</strong><br>
+            <br>
+            P(k) = | P_xx   P_xy   P_xvx  P_xvy  |<br>
+                   | P_xy   P_yy   P_yvx  P_yvy  |<br>
+                   | P_xvx  P_yvx  P_vxvx P_vxvy |<br>
+                   | P_xvy  P_yvy  P_vxvy P_vyvy |<br>
+            <br>
+            Meaning:<br>
+            • Diagonal: variance of each component (x, y, vx, vy)<br>
+            • Off-diagonal: covariance between components<br>
+            • Higher values = more uncertainty<br>
+            <br>
+            Example interpretation:<br>
+            P_xx = 100  means X position uncertainty is high<br>
+            P_vxvx = 1  means X velocity uncertainty is low<br>
+            <br>
+            ═════════════════════════════════════════════<br>
+            <br>
+            <strong>Process Noise Covariance Q (Dimensions: 4×4)</strong><br>
+            <br>
+            Q = | 0.1   0     0    0   |<br>
+                | 0     0.1   0    0   | × 0.01<br>
+                | 0     0     1    0   |<br>
+                | 0     0     0    1   |<br>
+            <br>
+            Meaning: "How much can the system deviate from our model?"<br>
+            <br>
+            • Q_xx, Q_yy small (0.001): Position model is pretty good<br>
+            • Q_vxvx, Q_vyvy larger (0.01): Velocity can change due to unknown forces<br>
+            • Diagonal only: We assume position and velocity noise are independent<br>
+            <br>
+            In our animation:<br>
+            The ball is moving in a circle, but our model assumes constant velocity.<br>
+            Q represents the error from that assumption!<br>
+            <br>
+            ═════════════════════════════════════════════<br>
+            <br>
+            <strong>Measurement Noise Covariance R (Dimensions: 2×2)</strong><br>
+            <br>
+            R = | 40   0  |<br>
+                | 0   40  |<br>
+            <br>
+            Meaning: "How noisy is the camera?"<br>
+            <br>
+            • R_xx = 40: Camera's X measurement error variance is 40 pixels²<br>
+            • R_yy = 40: Camera's Y measurement error variance is 40 pixels²<br>
+            • Diagonal only: Assume X and Y measurement errors are independent<br>
+            <br>
+            In our animation:<br>
+            You control R with the noise slider!<br>
+            Higher slider = higher R = less trust in measurements<br>
+            </code>
+        </div>
+        
+        <h3>7. Complete Picture: All Matrix Operations with Dimensions</h3>
+        <p>
+            Here's every single matrix operation in the Kalman filter algorithm, with dimensions labeled so you can verify they're valid.
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>PREDICTION PHASE</strong><br>
+            ═══════════════════════<br>
+            <br>
+            1. State Prediction:<br>
+               x̂⁻(k) = F · x̂(k-1)<br>
+               (4×1) = (4×4) × (4×1)  ✓<br>
+            <br>
+            2. Covariance Prediction:<br>
+               P⁻(k) = F · P(k-1) · Fᵀ + Q<br>
+               (4×4) = (4×4) × (4×4) × (4×4) + (4×4)  ✓<br>
+            <br>
+            ═══════════════════════════════════════════════<br>
+            <br>
+            <strong>UPDATE PHASE</strong><br>
+            ═══════════════════════<br>
+            <br>
+            3. Innovation:<br>
+               y(k) = z(k) - H · x̂⁻(k)<br>
+               (2×1) = (2×1) - (2×4) × (4×1)  ✓<br>
+            <br>
+            4. Innovation Covariance:<br>
+               S(k) = H · P⁻(k) · Hᵀ + R<br>
+               (2×2) = (2×4) × (4×4) × (4×2) + (2×2)  ✓<br>
+            <br>
+            5. Kalman Gain:<br>
+               K(k) = P⁻(k) · Hᵀ · S(k)⁻¹<br>
+               (4×2) = (4×4) × (4×2) × (2×2)⁻¹  ✓<br>
+            <br>
+            6. State Update:<br>
+               x̂(k) = x̂⁻(k) + K(k) · y(k)<br>
+               (4×1) = (4×1) + (4×2) × (2×1)  ✓<br>
+            <br>
+            7. Covariance Update:<br>
+               P(k) = (I - K(k) · H) · P⁻(k)<br>
+               (4×4) = (4×4 - (4×2) × (2×4)) × (4×4)  ✓<br>
+            </code>
+        </div>
+        
+        <h3>7.1 Why Matrix Dimensions Matter</h3>
+        <div class="derivation">
+            <p><strong>The Golden Rule of Matrix Multiplication:</strong></p>
+            <p style="margin-left: 20px;">
+                If A is (m×n) and B is (n×p), then A·B is (m×p)
+            </p>
+            <p style="margin: 15px 0 0 0;">
+                This means:
+            </p>
+            <ul style="margin-left: 20px;">
+                <li>The inner dimensions MUST match (n must be the same)</li>
+                <li>The outer dimensions determine the result shape</li>
+                <li>If dimensions don't match, the operation is undefined</li>
+            </ul>
+            <div class="step">
+                <p><strong>Example from our filter:</strong></p>
+                <p style="margin-left: 20px;">We compute H · P⁻(k):</p>
+                <p style="margin-left: 20px;">H is (2×4), P⁻(k) is (4×4)</p>
+                <p style="margin-left: 20px;">Inner dimensions: 4 and 4 ✓ Match!</p>
+                <p style="margin-left: 20px;">Result: (2×4) × (4×4) = (2×4) ✓</p>
+            </div>
+            <div class="step">
+                <p><strong>Example that would FAIL:</strong></p>
+                <p style="margin-left: 20px;">If we tried z(k) = H⁻¹ · x(k):</p>
+                <p style="margin-left: 20px;">H is (2×4), so H⁻¹ doesn't exist (not square!)</p>
+                <p style="margin-left: 20px;">This would crash the algorithm</p>
+            </div>
+            <div class="step">
+                <p><strong>How engineers verify their filter code:</strong></p>
+                <p style="margin-left: 20px;">1. Write down all dimensions</p>
+                <p style="margin-left: 20px;">2. Check each operation's dimensions</p>
+                <p style="margin-left: 20px;">3. If any operation fails, there's a bug!</p>
+            </div>
+        </div>
+        <h3>8. The Complete Algorithm: Step-by-Step Execution</h3>
+        <p>
+            Here's the full algorithm that runs in real-time in your animation. It repeats this cycle ~60 times per second:
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>INITIALIZATION (at start):</strong><br>
+            x̂(0) = [350, 350, 0, 0]ᵀ         (Ball probably at center, not moving)<br>
+            P(0) = large diagonal matrix     (Very uncertain initially)<br>
+            <br>
+            <strong>═══════════════════════════════════════════════</strong><br>
+            <strong>MAIN LOOP - For each frame k:</strong><br>
+            <strong>═══════════════════════════════════════════════</strong><br>
+            <br>
+            <strong>PHASE 1: PREDICT (Physics-based projection)</strong><br>
+            ───────────────────────────────────────────────<br>
+            1. x̂⁻(k) = F·x̂(k-1)                     [Apply motion model]<br>
+               ↳ Where should the ball be based on velocity?<br>
+            <br>
+            2. P⁻(k) = F·P(k-1)·Fᵀ + Q              [Grow uncertainty]<br>
+               ↳ How confident are we about that prediction?<br>
+            <br>
+            <strong>PHASE 2: UPDATE (Measurement correction)</strong><br>
+            ─────────────────────────────────────────────<br>
+            3. Measure: z(k) = camera reads [x_noisy, y_noisy]ᵀ<br>
+               ↳ Noisy but real!<br>
+            <br>
+            4. y(k) = z(k) - H·x̂⁻(k)               [Calculate surprise]<br>
+               ↳ Measurement minus prediction. Big surprise = measurement matters more<br>
+            <br>
+            5. S(k) = H·P⁻(k)·Hᵀ + R               [Innovation covariance]<br>
+               ↳ How big is the expected surprise?<br>
+            <br>
+            6. K(k) = P⁻(k)·Hᵀ·S(k)⁻¹              [THE MAGIC: Kalman gain]<br>
+               ↳ How much should we trust the measurement?<br>
+            <br>
+            7. x̂(k) = x̂⁻(k) + K(k)·y(k)           [Update estimate]<br>
+               ↳ Blend prediction with measurement<br>
+            <br>
+            8. P(k) = (I - K(k)·H)·P⁻(k)          [Update confidence]<br>
+               ↳ We're more confident now; uncertainty shrinks<br>
+            <br>
+            <strong>Loop back to step 1 with next measurement</strong><br>
+            </code>
+        </div>
+        
+        <h3>8.1 What Actually Happens in the Animation</h3>
+        <p>
+            Look at the visualization and understand what you're seeing:
+        </p>
+        <ul>
+            <li><strong>Blue ball (z(k)):</strong> This is what the camera sees—noisy measurements with random errors</li>
+            <li><strong>Green dot (x̂(k)):</strong> This is the filter estimate—smooth and accurate despite noise</li>
+            <li><strong>Red ball:</strong> Steers toward the green dot. Because the green dot is smooth, the red ball catches the blue ball reliably</li>
+        </ul>
+        <p>
+            The magic is that you never directly use the noisy blue ball position. The filter does all the intelligent blending!
+        </p>
+        
+        <h3>9. Why the Kalman Filter is Optimal</h3>
+        <p>
+            Under specific conditions, the Kalman filter mathematically guarantees the best possible estimate. Here's why:
+        </p>
+        <ul>
+            <li><strong>Linearity:</strong> Both the system dynamics and measurement model are linear 
+                (no x², sin(x), etc.). This makes the math tractable.</li>
+            <li><strong>Gaussian Noise:</strong> Noise is normally distributed with known variances. 
+                The filter was designed for this assumption.</li>
+            <li><strong>Unbiased Noise:</strong> No systematic errors; noise averages to zero over time.</li>
+            <li><strong>No Model Mismatch:</strong> The system truly follows our F and H matrices 
+                (though some deviation is tolerated via Q).</li>
+        </ul>
+        <p>
+            <strong>Result:</strong> The Kalman filter achieves BLUE (Best Linear Unbiased Estimator)—
+            among all linear estimators, it minimizes the mean squared error. Provably optimal!
+        </p>
+        
+        <h3>10. Key Properties of the Kalman Filter</h3>
+        <table>
+            <tr>
+                <th>Property</th>
+                <th>Why It Matters</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><strong>Recursive</strong></td>
+                <td>Only needs previous estimate and current measurement; no history storage</td>
+                <td>Can run on embedded systems with limited memory</td>
+            </tr>
+            <tr>
+                <td><strong>Optimal</strong></td>
+                <td>Mathematically proven to minimize mean squared error (under assumptions)</td>
+                <td>You can't do better with linear methods; this is provably best</td>
+            </tr>
+            <tr>
+                <td><strong>Real-time</strong></td>
+                <td>O(n³) complexity (where n is state dimension). Fast enough for 60 fps</td>
+                <td>Works on smartphones, drones, robots</td>
+            </tr>
+            <tr>
+                <td><strong>Adaptive</strong></td>
+                <td>Automatically learns how much to trust measurements vs predictions</td>
+                <td>As you play with noise slider, filter automatically adapts its behavior</td>
+            </tr>
+            <tr>
+                <td><strong>Elegant</strong></td>
+                <td>Beautifully unified framework combining prediction and measurement</td>
+                <td>Same algorithm works for car tracking, robot navigation, stock prices!</td>
+            </tr>
+        </table>
+        
+        <h3>11. When Kalman Filter Might Struggle</h3>
+        <ul>
+            <li><strong>Nonlinear systems:</strong> F and H matrices are nonlinear. Use Extended Kalman Filter (EKF)</li>
+            <li><strong>Unknown noise parameters:</strong> If you don't know Q and R, the filter might be overconfident</li>
+            <li><strong>Non-Gaussian noise:</strong> Real-world noise often has outliers. Use robust filters instead</li>
+            <li><strong>Multi-modal distributions:</strong> Multiple possible states. Use particle filters</li>
+        </ul>
+        
+        <h3>12. Extensions for Nonlinear Systems</h3>
+        <p>
+            Our animation uses a linear system (constant velocity). But what if things are more complex?
+        </p>
+        <ul>
+            <li>
+                <strong>Extended Kalman Filter (EKF):</strong> Linearizes around the current estimate. 
+                Works well for "mildly" nonlinear systems.
+            </li>
+            <li>
+                <strong>Unscented Kalman Filter (UKF):</strong> Uses clever sampling instead of linearization. 
+                Better accuracy than EKF, slightly more complex.
+            </li>
+            <li>
+                <strong>Particle Filter:</strong> Represents uncertainty as many "particles" (samples). 
+                Handles highly nonlinear and non-Gaussian systems. More computationally expensive.
+            </li>
+        </ul>
+        
+        <h3>13. Historical Context & Impact</h3>
+        <p>
+            The Kalman filter was invented by Rudolf Kalman in 1960. It became famous during the Apollo space program, 
+            where it was used to estimate the position and velocity of spacecraft. Today it's everywhere:
+        </p>
+        <ul>
+            <li>GPS receivers use it to smooth noisy location data</li>
+            <li>Self-driving cars use extended versions to track nearby vehicles</li>
+            <li>Drones use it for stable flight control</li>
+            <li>Financial systems use variants to predict stock prices</li>
+            <li>Weather forecasting uses ensemble Kalman filters</li>
+        </ul>
+        
+        <h3>14. Key Takeaways</h3>
+        <div class="derivation">
+            <p style="margin: 0;">
+                <strong>The Kalman filter is the answer to:</strong> "I have a noisy measurement and a physical model. 
+                What's my best estimate of the truth?"
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>The key insight:</strong> Intelligently blend prediction and measurement. 
+                The blend ratio (Kalman gain) self-adjusts based on how reliable each source is.
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Why it works:</strong> Gaussian distributions and linear systems play nicely together. 
+                The math becomes elegant and tractable.
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Its magic:</strong> It's optimal! Proves that your blend is better than any other possible blend. 
+                Unmatched in its elegance and applicability.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 2D Kalman Filter for position tracking
+        class KalmanFilter2D {
+            constructor(processNoise = 0.1, measurementNoise = 40) {
+                // State: [x, y, vx, vy]
+                this.state = [350, 350, 0, 0];
+                
+                // State covariance matrix (4x4)
+                this.P = [
+                    [1000, 0, 0, 0],
+                    [0, 1000, 0, 0],
+                    [0, 0, 100, 0],
+                    [0, 0, 0, 100]
+                ];
+                
+                // Process noise
+                this.Q = [
+                    [processNoise, 0, 0, 0],
+                    [0, processNoise, 0, 0],
+                    [0, 0, processNoise * 10, 0],
+                    [0, 0, 0, processNoise * 10]
+                ];
+                
+                // Measurement noise
+                this.R = measurementNoise;
+                
+                this.dt = 0.016; // ~60fps
+            }
+            
+            predict() {
+                const [x, y, vx, vy] = this.state;
+                
+                // State transition: position += velocity
+                this.state[0] = x + vx * this.dt;
+                this.state[1] = y + vy * this.dt;
+                // Velocity stays constant
+                
+                // Covariance prediction (simplified)
+                // P' = F*P*F^T + Q
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        if (i >= 2 && j < 2) {
+                            this.P[i][j] += this.Q[i][j] * this.dt;
+                        } else if (i < 2 && j >= 2) {
+                            this.P[i][j] += this.Q[i][j] * this.dt;
+                        } else {
+                            this.P[i][j] += this.Q[i][j];
+                        }
+                    }
+                }
+            }
+            
+            update(measuredX, measuredY) {
+                // Innovation
+                const innovation_x = measuredX - this.state[0];
+                const innovation_y = measuredY - this.state[1];
+                
+                // Kalman gain (simplified for position measurements)
+                const K_x = this.P[0][0] / (this.P[0][0] + this.R);
+                const K_y = this.P[1][1] / (this.P[1][1] + this.R);
+                
+                // Update state
+                this.state[0] += K_x * innovation_x;
+                this.state[1] += K_y * innovation_y;
+                this.state[2] += K_x * innovation_x * 0.5; // Update velocity estimate
+                this.state[3] += K_y * innovation_y * 0.5;
+                
+                // Update covariance
+                this.P[0][0] *= (1 - K_x);
+                this.P[1][1] *= (1 - K_y);
+            }
+            
+            setMeasurementNoise(noise) {
+                this.R = noise;
+            }
+            
+            getPosition() {
+                return [this.state[0], this.state[1]];
+            }
+            
+            getVelocity() {
+                return [this.state[2], this.state[3]];
+            }
+        }
+
+        // Ball chase simulation
+        class BallChaseSimulation {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                
+                this.centerX = canvas.width / 2;
+                this.centerY = canvas.height / 2;
+                this.radius = 120;
+                
+                // Blue ball (target) - moves in circle
+                this.blueAngle = 0;
+                this.blueSpeed = 0.008; // radians per frame
+                this.blueBallRadius = 12;
+                
+                // Red ball (hunter)
+                this.redX = this.centerX - this.radius;
+                this.redY = this.centerY;
+                this.redBallRadius = 12;
+                this.redSpeed = this.radius * this.blueSpeed; // Same speed as blue ball (linear equivalent)
+                
+                // Kalman filter
+                this.kalman = new KalmanFilter2D(0.1, 40);
+                this.kalmanNoise = 40;
+                
+                // Tracking
+                this.caught = false;
+                this.caughtTime = 0;
+                this.catchDistance = 25;
+                
+                this.blueTrail = [];
+                this.redTrail = [];
+                
+                this.running = true;
+                
+                this.animate();
+            }
+            
+            update() {
+                // Update blue ball position (circular motion)
+                this.blueAngle += this.blueSpeed;
+                const blueX = this.centerX + this.radius * Math.cos(this.blueAngle);
+                const blueY = this.centerY + this.radius * Math.sin(this.blueAngle);
+                
+                // Add measurement noise to blue ball position
+                const measuredX = blueX + (Math.random() - 0.5) * Math.sqrt(this.kalmanNoise);
+                const measuredY = blueY + (Math.random() - 0.5) * Math.sqrt(this.kalmanNoise);
+                
+                // Kalman filter prediction and update
+                this.kalman.predict();
+                this.kalman.update(measuredX, measuredY);
+                
+                const [predX, predY] = this.kalman.getPosition();
+                
+                // Calculate where blue ball will be based on its circular motion
+                // Predict ahead multiple frames
+                const futureSteps = 5;
+                const futureAngle = this.blueAngle + this.blueSpeed * futureSteps;
+                const futureBlueX = this.centerX + this.radius * Math.cos(futureAngle);
+                const futureBlueY = this.centerY + this.radius * Math.sin(futureAngle);
+                
+                // Red ball moves at constant speed towards predicted future position
+                const dx = futureBlueX - this.redX;
+                const dy = futureBlueY - this.redY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 0) {
+                    // Only adjust direction, maintain constant speed
+                    const ux = dx / distance;
+                    const uy = dy / distance;
+                    this.redX += ux * this.redSpeed;
+                    this.redY += uy * this.redSpeed;
+                }
+                
+                // Check if caught
+                const catchDist = Math.sqrt(
+                    (blueX - this.redX) ** 2 + 
+                    (blueY - this.redY) ** 2
+                );
+                
+                if (catchDist < this.catchDistance) {
+                    this.caught = true;
+                    this.caughtTime = 60; // Show caught message for 1 second
+                }
+                
+                if (this.caught) {
+                    this.caughtTime--;
+                    if (this.caughtTime <= 0) {
+                        this.caught = false;
+                    }
+                }
+                
+                // Store trails
+                this.blueTrail.push({ x: blueX, y: blueY });
+                this.redTrail.push({ x: this.redX, y: this.redY });
+                
+                if (this.blueTrail.length > 200) {
+                    this.blueTrail.shift();
+                    this.redTrail.shift();
+                }
+                
+                // Store current positions for display
+                this.blueX = blueX;
+                this.blueY = blueY;
+                this.predX = futureBlueX;
+                this.predY = futureBlueY;
+                this.distance = catchDist;
+                this.predError = Math.sqrt(
+                    (futureBlueX - predX) ** 2 + 
+                    (futureBlueY - predY) ** 2
+                );
+            }
+            
+            draw() {
+                // Clear canvas
+                this.ctx.fillStyle = '#1a1a2e';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw circular path
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Draw center point
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Draw trails
+                this.drawTrail(this.blueTrail, '#3498db');
+                this.drawTrail(this.redTrail, '#e74c3c');
+                
+                // Draw prediction point
+                this.ctx.fillStyle = '#2ecc71';
+                this.ctx.globalAlpha = 0.7;
+                this.ctx.beginPath();
+                this.ctx.arc(this.predX, this.predY, 6, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1.0;
+                
+                // Draw prediction arrow
+                this.ctx.strokeStyle = '#2ecc71';
+                this.ctx.lineWidth = 1.5;
+                this.ctx.globalAlpha = 0.5;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.redX, this.redY);
+                this.ctx.lineTo(this.predX, this.predY);
+                this.ctx.stroke();
+                this.ctx.globalAlpha = 1.0;
+                
+                // Draw balls
+                this.drawBall(this.blueX, this.blueY, this.blueBallRadius, '#3498db');
+                this.drawBall(this.redX, this.redY, this.redBallRadius, '#e74c3c');
+                
+                // Draw caught indicator
+                if (this.caught || this.caughtTime > 0) {
+                    this.ctx.fillStyle = 'rgba(255, 165, 0, 0.7)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(
+                        this.blueX, this.blueY,
+                        this.blueBallRadius + 10, 0, Math.PI * 2
+                    );
+                    this.ctx.stroke();
+                    this.ctx.strokeStyle = '#ff9800';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.stroke();
+                }
+            }
+            
+            drawTrail(trail, color) {
+                if (trail.length < 2) return;
+                
+                this.ctx.strokeStyle = color;
+                this.ctx.lineWidth = 1.5;
+                this.ctx.globalAlpha = 0.3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(trail[0].x, trail[0].y);
+                
+                for (let i = 1; i < trail.length; i++) {
+                    this.ctx.lineTo(trail[i].x, trail[i].y);
+                }
+                this.ctx.stroke();
+                this.ctx.globalAlpha = 1.0;
+            }
+            
+            drawBall(x, y, radius, color) {
+                // Ball shadow
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x, y + radius + 5, radius, radius * 0.3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Ball
+                this.ctx.fillStyle = color;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Highlight
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                this.ctx.beginPath();
+                this.ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            animate() {
+                if (this.running) {
+                    this.update();
+                }
+                this.draw();
+                this.updateStats();
+                requestAnimationFrame(() => this.animate());
+            }
+            
+            updateStats() {
+                document.getElementById('blueX').textContent = this.blueX.toFixed(1);
+                document.getElementById('blueY').textContent = this.blueY.toFixed(1);
+                document.getElementById('redX').textContent = this.redX.toFixed(1);
+                document.getElementById('redY').textContent = this.redY.toFixed(1);
+                document.getElementById('predictX').textContent = this.predX.toFixed(1);
+                document.getElementById('predictY').textContent = this.predY.toFixed(1);
+                document.getElementById('distance').textContent = this.distance.toFixed(1);
+                document.getElementById('predError').textContent = this.predError.toFixed(1);
+                document.getElementById('radius').textContent = this.radius.toFixed(0);
+                
+                const status = document.getElementById('status');
+                if (this.caught || this.caughtTime > 0) {
+                    status.textContent = '🎉 Caught! ✨';
+                    status.classList.add('caught');
+                } else {
+                    status.textContent = '🎯 Chasing...';
+                    status.classList.remove('caught');
+                }
+            }
+            
+            reset() {
+                this.blueAngle = 0;
+                this.redX = this.centerX - this.radius;
+                this.redY = this.centerY;
+                this.caught = false;
+                this.caughtTime = 0;
+                this.blueTrail = [];
+                this.redTrail = [];
+                this.kalman = new KalmanFilter2D(0.1, this.kalmanNoise);
+            }
+            
+            togglePause() {
+                this.running = !this.running;
+            }
+            
+            setMeasurementNoise(noise) {
+                this.kalmanNoise = noise;
+                this.kalman.setMeasurementNoise(noise);
+            }
+            
+            setRadius(radius) {
+                this.radius = radius;
+                this.reset();
+            }
+        }
+
+        // Initialize
+        const canvas = document.getElementById('canvas');
+        const simulation = new BallChaseSimulation(canvas);
+        
+        // Event listeners
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            simulation.reset();
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', (e) => {
+            simulation.togglePause();
+            e.target.textContent = simulation.running ? 'Pause' : 'Resume';
+        });
+        
+        document.getElementById('noiseSlider').addEventListener('input', (e) => {
+            const noise = parseFloat(e.target.value);
+            simulation.setMeasurementNoise(noise);
+            document.getElementById('noiseValue').textContent = noise;
+        });
+        
+        document.getElementById('radiusSlider').addEventListener('input', (e) => {
+            const radius = parseFloat(e.target.value);
+            simulation.setRadius(radius);
+            document.getElementById('radiusValue').textContent = radius;
+        });
+    </script>
+</body>
+</html>

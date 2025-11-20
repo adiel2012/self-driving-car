@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PID Controller Ball Chase</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .info {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            max-width: 900px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 70px;
+        }
+        
+        .canvas-controls {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        canvas {
+            border: 3px solid #333;
+            border-radius: 8px;
+            background: #1a1a2e;
+            display: block;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 280px;
+        }
+        
+        .panel {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .panel h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #555;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stat:last-child {
+            border-bottom: none;
+        }
+        
+        .label {
+            font-weight: 600;
+        }
+        
+        .value {
+            font-weight: bold;
+            color: #e74c3c;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #e74c3c;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .canvas-controls button {
+            padding: 12px 24px;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .canvas-controls button:hover {
+            box-shadow: 0 6px 16px rgba(231, 76, 60, 0.5);
+        }
+        
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .slider-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .slider-value {
+            font-weight: bold;
+            color: #e74c3c;
+            font-family: 'Courier New', monospace;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e74c3c;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e74c3c;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 13px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .status.caught {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+            color: #e65100;
+        }
+
+        .math-section {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .math-section h2 {
+            color: #333;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        .math-section h3 {
+            color: #e74c3c;
+            margin-top: 25px;
+        }
+        
+        .math-section p {
+            color: #555;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+        
+        .math-box {
+            background: #f5f5f5;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .math-box code {
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .derivation {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .derivation p {
+            color: #333;
+            margin: 8px 0;
+        }
+        
+        .step {
+            margin: 12px 0 12px 20px;
+            padding-left: 15px;
+            border-left: 2px solid #ff9800;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+        
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        table th {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚽ PID Controller Ball Chase</h1>
+    <div class="info">
+        <p>The red ball uses a PID (Proportional-Integral-Derivative) Controller to chase the blue ball moving in a circle. 
+        Adjust the PID gains to see how different control strategies affect the chase behavior. PID is simpler but requires tuning!</p>
+    </div>
+    
+    <div class="container" id="mainContainer">
+        <div class="canvas-wrapper">
+            <canvas id="canvas" width="700" height="700"></canvas>
+            <div class="canvas-controls">
+                <button id="resetBtn">🔄 Reset</button>
+                <button id="pauseBtn">⏸️ Pause</button>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="status" id="status">
+                🎯 Chasing...
+            </div>
+            
+            <div class="panel">
+                <h3>Blue Ball (Target)</h3>
+                <div class="stat">
+                    <span class="label">Position X:</span>
+                    <span class="value" id="blueX">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Position Y:</span>
+                    <span class="value" id="blueY">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Circle Radius:</span>
+                    <span class="value" id="radius">0.0</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>Red Ball (Hunter)</h3>
+                <div class="stat">
+                    <span class="label">Position X:</span>
+                    <span class="value" id="redX">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Position Y:</span>
+                    <span class="value" id="redY">0.0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Distance:</span>
+                    <span class="value" id="distance">0.0</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>Control Method</h3>
+                <div class="stat">
+                    <span class="label">Strategy:</span>
+                    <span class="value">Predictive Steering</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Red Ball Speed:</span>
+                    <span class="value" id="speedValue">0.96 px/f</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="slider-group">
+                    <label>Circle Radius (R)</label>
+                    <input type="range" id="radiusSlider" min="50" max="200" value="120">
+                    <span class="slider-value" id="radiusValue">120</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>Legend</h3>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3498db;"></div>
+                        <span>Blue Ball (Target)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e74c3c;"></div>
+                        <span>Red Ball (Hunter)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(255,255,255,0.3);"></div>
+                        <span>Circular Path</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="math-section">
+        <h2>📐 PID Controller: Mathematical Foundation & Design</h2>
+        
+        <h3>0. Intuitive Understanding First</h3>
+        <p>
+            A PID controller is like a person trying to catch a moving ball. They adjust their movement based on:
+            <br><br>
+            <strong>"Where is the ball now? (P) How far behind am I catching up? (I) Is it moving towards or away from me? (D)"</strong>
+            <br><br>
+            The controller combines three "feedback" signals to decide how hard to steer.
+        </p>
+        
+        <h3>1. Introduction to PID Control</h3>
+        <p>
+            A PID (Proportional-Integral-Derivative) Controller is a feedback control system that adjusts a control 
+            signal (output) based on the error between a desired setpoint and the actual measured value.
+            <br><br>
+            Unlike the Kalman filter which estimates the state, the PID controller directly controls behavior.
+            It's simpler, requires no model, but needs manual tuning of three parameters (Kp, Ki, Kd).
+        </p>
+        
+        <h3>2. The Three Components of PID</h3>
+        
+        <div class="math-box">
+            <code>
+            <strong>The Complete PID Control Law:</strong><br>
+            </code>
+            <div style="margin: 15px 0; text-align: center;">
+                $$u(t) = K_p \cdot e(t) + K_i \cdot \int_0^t e(\tau) d\tau + K_d \cdot \frac{de(t)}{dt}$$
+            </div>
+            <code>
+            Where:<br>
+            • \(u(t)\) = control output (what we do)<br>
+            • \(e(t) = \text{setpoint} - \text{measured value}\) = error<br>
+            • \(K_p\) = proportional gain<br>
+            • \(K_i\) = integral gain<br>
+            • \(K_d\) = derivative gain<br>
+            </code>
+        </div>
+        
+        <h3>2.1 The P (Proportional) Term</h3>
+        <p>
+            <strong>Simple reaction:</strong> "How far away are you? Act proportionally."
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>Proportional Term:</strong><br>
+            </code>
+            <div style="margin: 15px 0; text-align: center;">
+                $$u_P(t) = K_p \cdot e(t)$$
+            </div>
+            <code>
+            Meaning:<br>
+            • If error is large, apply large control signal<br>
+            • If error is small, apply small control signal<br>
+            • Direct and immediate response<br>
+            <br>
+            Problem: Can never reach zero error with just P<br>
+            (steady-state error remains)<br>
+            </code>
+        </div>
+        
+        <div class="derivation">
+            <p><strong>Why Pure P Control Fails:</strong></p>
+            <div class="step">
+                <p>At steady state: u = Kp·e where u is the control needed to maintain velocity</p>
+            </div>
+            <div class="step">
+                <p>If target is moving, we need some steady control to keep up</p>
+            </div>
+            <div class="step">
+                <p>But if we've caught the target perfectly (e=0), we apply u=0 and fall behind!</p>
+            </div>
+            <div class="step">
+                <p><strong>Solution:</strong> Add the Integral term to eliminate steady-state error</p>
+            </div>
+        </div>
+        
+        <h3>2.2 The I (Integral) Term</h3>
+        <p>
+            <strong>Historical correction:</strong> "Have you been far away for a long time? Keep pushing harder."
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>Integral Term (Continuous):</strong><br>
+            </code>
+            <div style="margin: 15px 0; text-align: center;">
+                $$u_I(t) = K_i \cdot \int_0^t e(\tau) d\tau$$
+            </div>
+            <code>
+            <strong>Discrete Implementation (what we use):</strong><br>
+            </code>
+            <div style="margin: 15px 0; text-align: center;">
+                $$I_{\text{sum}} \leftarrow I_{\text{sum}} + e(k) \cdot \Delta t$$
+                $$u_I(k) = K_i \cdot I_{\text{sum}}$$
+            </div>
+            <code>
+            Meaning:<br>
+            • Accumulates error over time<br>
+            • Grows if error persists<br>
+            • Eliminates steady-state error<br>
+            • Can cause overshoot (goes too far)<br>
+            </code>
+        </div>
+        
+        <div class="derivation">
+            <p><strong>Why Integral Term Works:</strong></p>
+            <div class="step">
+                <p>The integral accumulates: if e > 0 continuously, integral grows</p>
+            </div>
+            <div class="step">
+                <p>Growing integral means growing u_I term → stronger control</p>
+            </div>
+            <div class="step">
+                <p>Eventually, we accelerate enough to catch the target</p>
+            </div>
+            <div class="step">
+                <p>When we catch it (e=0), integral stops growing (but doesn't shrink immediately)</p>
+            </div>
+            <div class="step">
+                <p>We maintain enough control effort to stay with the target</p>
+            </div>
+        </div>
+        
+        <h3>2.3 The D (Derivative) Term</h3>
+        <p>
+            <strong>Predictive braking:</strong> "Are you getting closer or further away? Adjust your steering rate."
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>Derivative Term (Continuous):</strong><br>
+            </code>
+            <div style="margin: 15px 0; text-align: center;">
+                $$u_D(t) = K_d \cdot \frac{de(t)}{dt}$$
+            </div>
+            <code>
+            <strong>Discrete Implementation (what we use):</strong><br>
+            </code>
+            <div style="margin: 15px 0; text-align: center;">
+                $$\Delta e = e(k) - e(k-1)$$
+                $$u_D(k) = K_d \cdot \frac{\Delta e}{\Delta t}$$
+            </div>
+            <code>
+            Meaning:<br>
+            • Rate of change of error<br>
+            • Positive de/dt = error increasing → slow down the control<br>
+            • Negative de/dt = error decreasing → you're catching up!<br>
+            • Reduces overshoot<br>
+            • Adds damping (smoothing)<br>
+            </code>
+        </div>
+        
+        <div class="derivation">
+            <p><strong>Why Derivative Term Works:</strong></p>
+            <div class="step">
+                <p>If error is decreasing fast (you're catching up), de/dt is negative</p>
+            </div>
+            <div class="step">
+                <p>Negative de/dt means u_D becomes negative → reduces total control effort</p>
+            </div>
+            <div class="step">
+                <p>This prevents overshooting and oscillation</p>
+            </div>
+            <div class="step">
+                <p>It's like applying brakes when you're approaching the target too fast</p>
+            </div>
+        </div>
+        
+        <h3>3. Application to Ball Chasing</h3>
+        <p>
+            We apply PID control to both X and Y coordinates independently.
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>For X-direction movement:</strong><br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$e_x = x_{\text{blue}} - x_{\text{red}}$$
+                $$u_x = K_p \cdot e_x + K_i \cdot \int e_x dt + K_d \cdot \frac{de_x}{dt}$$
+                $$x_{\text{red,new}} = x_{\text{red}} + u_x$$
+            </div>
+            <code>
+            <br>
+            <strong>For Y-direction movement:</strong><br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$e_y = y_{\text{blue}} - y_{\text{red}}$$
+                $$u_y = K_p \cdot e_y + K_i \cdot \int e_y dt + K_d \cdot \frac{de_y}{dt}$$
+                $$y_{\text{red,new}} = y_{\text{red}} + u_y$$
+            </div>
+            <code>
+            <strong>This allows independent 2D control!</strong><br>
+            </code>
+        </div>
+        
+        <h3>4. PID Algorithm: Step-by-Step</h3>
+        
+        <div class="math-box">
+            <code>
+            <strong>INITIALIZATION:</strong><br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$I_{\text{sum,x}} = 0, \quad I_{\text{sum,y}} = 0$$
+                $$e_{\text{prev,x}} = 0, \quad e_{\text{prev,y}} = 0$$
+            </div>
+            <code>
+            <strong>For each frame k:</strong><br>
+            ──────────────────────────<br>
+            <br>
+            1. MEASURE current state:<br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$(x_{\text{blue}}, y_{\text{blue}}) = \text{target position}$$
+                $$(x_{\text{red}}, y_{\text{red}}) = \text{current position}$$
+            </div>
+            <code>
+            <br>
+            2. CALCULATE errors (proportional term):<br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$e_x(k) = x_{\text{blue}} - x_{\text{red}}$$
+                $$e_y(k) = y_{\text{blue}} - y_{\text{red}}$$
+            </div>
+            <code>
+            <br>
+            3. ACCUMULATE errors (integral term):<br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$I_{\text{sum,x}} \leftarrow I_{\text{sum,x}} + e_x(k) \cdot \Delta t$$
+                $$I_{\text{sum,y}} \leftarrow I_{\text{sum,y}} + e_y(k) \cdot \Delta t$$
+            </div>
+            <code>
+            <br>
+            4. COMPUTE rate of change (derivative term):<br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$\Delta e_x = e_x(k) - e_{\text{prev,x}}$$
+                $$\Delta e_y = e_y(k) - e_{\text{prev,y}}$$
+            </div>
+            <code>
+            <br>
+            5. COMPUTE control output:<br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$u_x = K_p \cdot e_x + K_i \cdot I_{\text{sum,x}} + K_d \cdot \Delta e_x$$
+                $$u_y = K_p \cdot e_y + K_i \cdot I_{\text{sum,y}} + K_d \cdot \Delta e_y$$
+            </div>
+            <code>
+            <br>
+            6. APPLY control (move toward target):<br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$x_{\text{red}} \leftarrow x_{\text{red}} + u_x$$
+                $$y_{\text{red}} \leftarrow y_{\text{red}} + u_y$$
+            </div>
+            <code>
+            <br>
+            7. UPDATE for next iteration:<br>
+            </code>
+            <div style="margin: 10px 0; text-align: center;">
+                $$e_{\text{prev,x}} = e_x(k)$$
+                $$e_{\text{prev,y}} = e_y(k)$$
+            </div>
+        </div>
+        
+        <h3>5. PID Tuning Guidelines</h3>
+        <p>
+            Tuning PID is an art and science. Here's what each parameter does:
+        </p>
+        
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Effect of Increasing</th>
+                <th>Danger Zone</th>
+            </tr>
+            <tr>
+                <td><strong>Kp</strong></td>
+                <td>Faster response to error, more aggressive</td>
+                <td>Too high → oscillation, overshoot</td>
+            </tr>
+            <tr>
+                <td><strong>Ki</strong></td>
+                <td>Eliminates steady-state error, maintains effort</td>
+                <td>Too high → integral windup, big overshoot</td>
+            </tr>
+            <tr>
+                <td><strong>Kd</strong></td>
+                <td>Reduces overshoot, smooths response</td>
+                <td>Too high → noisy, jerky, sensitive to noise</td>
+            </tr>
+        </table>
+        
+        <h3>6. Comparison: PID vs Kalman Filter</h3>
+        
+        <table>
+            <tr>
+                <th>Aspect</th>
+                <th>Kalman Filter</th>
+                <th>PID Controller</th>
+            </tr>
+            <tr>
+                <td><strong>Purpose</strong></td>
+                <td>Estimate true state from noisy data</td>
+                <td>Minimize error by applying control</td>
+            </tr>
+            <tr>
+                <td><strong>Requires Model</strong></td>
+                <td>Yes (F, H matrices)</td>
+                <td>No (just needs error signal)</td>
+            </tr>
+            <tr>
+                <td><strong>Tuning</strong></td>
+                <td>Specify Q, R (noise characteristics)</td>
+                <td>Tune Kp, Ki, Kd (gain parameters)</td>
+            </tr>
+            <tr>
+                <td><strong>Optimality</strong></td>
+                <td>Mathematically optimal (proven)</td>
+                <td>No mathematical guarantee</td>
+            </tr>
+            <tr>
+                <td><strong>Complexity</strong></td>
+                <td>Complex (covariance matrices)</td>
+                <td>Simple (three numbers)</td>
+            </tr>
+            <tr>
+                <td><strong>Real-time Capability</strong></td>
+                <td>Good (O(n³))</td>
+                <td>Excellent (O(1))</td>
+            </tr>
+            <tr>
+                <td><strong>Robustness</strong></td>
+                <td>Sensitive to model mismatch</td>
+                <td>Robust to unknown disturbances</td>
+            </tr>
+        </table>
+        
+        <h3>7. Mathematical Properties</h3>
+        
+        <h3>7.1 Steady-State Error (Why We Need I)</h3>
+        
+        <div class="derivation">
+            <p><strong>With Only P Control:</strong></p>
+            <div class="step">
+                <p>At steady state: ż = 0 (target not accelerating)</p>
+            </div>
+            <div class="step">
+                <p>Physics: ẋ = u (red ball velocity equals control output)</p>
+            </div>
+            <div class="step">
+                <p>To match velocity: u = ż (maintain some control effort)</p>
+            </div>
+            <div class="step">
+                <p>But P control: u = Kp·e, so e = u/Kp = ż/Kp</p>
+            </div>
+            <div class="step">
+                <p><strong>Result:</strong> Permanent error e_ss = ż/Kp (steady-state error)</p>
+            </div>
+            <div class="step">
+                <p><strong>Solution:</strong> Add I term to grow control effort until e = 0</p>
+            </div>
+        </div>
+        
+        <h3>7.2 Stability Considerations</h3>
+        <p>
+            The PID controller can become unstable if gains are too high. The system will oscillate and diverge.
+        </p>
+        
+        <ul>
+            <li><strong>Underdamped:</strong> Oscillates around target, slowly converges</li>
+            <li><strong>Critically Damped:</strong> Reaches target in shortest time without overshoot (ideal)</li>
+            <li><strong>Overdamped:</strong> Reaches target slowly, very smooth (sluggish)</li>
+        </ul>
+        
+        <h3>8. Practical Tuning Method: Ziegler-Nichols</h3>
+        <p>
+            A classic method to find initial PID gains:
+        </p>
+        
+        <div class="derivation">
+            <div class="step">
+                <p><strong>Step 1:</strong> Set Ki = 0, Kd = 0 (only proportional)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 2:</strong> Increase Kp until the system oscillates (critical Kp = Ku)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 3:</strong> Measure oscillation period (Pu)</p>
+            </div>
+            <div class="step">
+                <p><strong>Step 4:</strong> Set recommended gains:</p>
+                <p style="margin-left: 20px;">Kp = 0.6 · Ku</p>
+                <p style="margin-left: 20px;">Ki = 1.2 · Ku / Pu</p>
+                <p style="margin-left: 20px;">Kd = 3 · Ku · Pu / 40</p>
+            </div>
+            <div class="step">
+                <p>These are starting points—fine-tune by observation!</p>
+            </div>
+        </div>
+        
+        <h3>9. Integral Windup Problem</h3>
+        <p>
+            One gotcha with I term: if error persists for a long time, the integral grows unbounded.
+            When the error finally goes away, the huge integral causes overshoot.
+        </p>
+        
+        <div class="math-box">
+            <code>
+            <strong>Anti-Windup Clamping:</strong><br>
+            <br>
+            I_max = 1000  (arbitrary limit)<br>
+            I_sum = min(max(I_sum, -I_max), I_max)<br>
+            <br>
+            This prevents the integral from growing too large.<br>
+            In our animation, we don't need this since<br>
+            the target is reachable, but real systems use it!<br>
+            </code>
+        </div>
+        
+        <h3>10. Advantages of PID Control</h3>
+        <ul>
+            <li><strong>Simplicity:</strong> Just three numbers to tune</li>
+            <li><strong>Universality:</strong> Works for almost any system (temperature, speed, position)</li>
+            <li><strong>No Model Needed:</strong> Doesn't require knowing F and H matrices</li>
+            <li><strong>Robustness:</strong> Works well even with unknown disturbances</li>
+            <li><strong>Low Computational Cost:</strong> O(1) per iteration (vs O(n³) for Kalman)</li>
+            <li><strong>Proven in Industry:</strong> 70+ years of real-world success</li>
+        </ul>
+        
+        <h3>11. Limitations of PID Control</h3>
+        <ul>
+            <li><strong>No Optimality Guarantee:</strong> Can't prove it's the best</li>
+            <li><strong>Requires Tuning:</strong> No systematic way, needs trial and error</li>
+            <li><strong>Can't Handle Nonlinearity Well:</strong> Fixed gains don't adapt</li>
+            <li><strong>Ignores Measurements:</strong> Doesn't use sensor data to update estimates</li>
+            <li><strong>Manual Gain Selection:</strong> Different systems need different gains</li>
+        </ul>
+        
+        <h3>12. When to Use PID vs Kalman</h3>
+        
+        <div class="derivation">
+            <p><strong>Use PID When:</strong></p>
+            <ul style="margin-left: 20px;">
+                <li>You need simple, fast control</li>
+                <li>System is well-behaved and easily controllable</li>
+                <li>Measurements are clean (not too noisy)</li>
+                <li>You have computational constraints (embedded systems)</li>
+                <li>System dynamics are unknown or complex</li>
+            </ul>
+            <p style="margin-top: 15px;"><strong>Use Kalman When:</strong></p>
+            <ul style="margin-left: 20px;">
+                <li>You have very noisy measurements</li>
+                <li>You want to estimate hidden states</li>
+                <li>System dynamics are well-understood and linear</li>
+                <li>You want mathematical optimality guarantees</li>
+                <li>You can afford computational complexity</li>
+            </ul>
+            <p style="margin-top: 15px;"><strong>Use Combined (PID + Kalman):</strong></p>
+            <ul style="margin-left: 20px;">
+                <li>Use Kalman to estimate true state from noisy sensors</li>
+                <li>Use PID to control based on the estimated state</li>
+                <li>Best of both worlds!</li>
+            </ul>
+        </div>
+        
+        <h3>13. Real-World Applications</h3>
+        <ul>
+            <li><strong>Cruise Control:</strong> Maintains constant speed despite hills and wind</li>
+            <li><strong>Thermostat:</strong> Maintains room temperature</li>
+            <li><strong>Drone Stabilization:</strong> Keeps quadcopter level</li>
+            <li><strong>Robot Arm:</strong> Tracks desired position</li>
+            <li><strong>Autopilot:</strong> Keeps aircraft on course</li>
+            <li><strong>Manufacturing:</strong> Control conveyor speed, pressure, temperature</li>
+        </ul>
+        
+        <h3>14. Try This in the Animation</h3>
+        <p>
+            Experiment with the sliders to understand each term:
+        </p>
+        <ul>
+            <li><strong>Increase Kp:</strong> Red ball responds faster but starts to oscillate</li>
+            <li><strong>Increase Ki:</strong> Red ball maintains velocity better, can overshoot</li>
+            <li><strong>Increase Kd:</strong> Red ball smooths out, less oscillation, may undershoot</li>
+            <li><strong>Sweet spot:</strong> Find where it catches the blue ball smoothly with minimal overshoot</li>
+        </ul>
+        
+        <h3>15. Key Takeaways</h3>
+        <div class="derivation">
+            <p style="margin: 0;">
+                <strong>PID is a feedback controller:</strong> It reacts to error by adjusting control output.
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Three terms working together:</strong> P gives immediate response, I eliminates steady-state error, D smooths oscillations.
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Simple but powerful:</strong> No model needed, just tune three numbers. Works across industries.
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Complementary to Kalman:</strong> PID controls behavior, Kalman estimates state. Can use both!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // PID Controller Implementation
+        class PIDController {
+            constructor(kp = 0.1, ki = 0.02, kd = 0.15) {
+                this.kp = kp;
+                this.ki = ki;
+                this.kd = kd;
+                
+                this.integral = 0;
+                this.prevError = 0;
+                this.dt = 0.016; // ~60fps
+            }
+            
+            compute(error) {
+                // Proportional term
+                const p_term = this.kp * error;
+                
+                // Integral term
+                this.integral += error * this.dt;
+                this.integral = Math.max(-1000, Math.min(1000, this.integral)); // Anti-windup
+                const i_term = this.ki * this.integral;
+                
+                // Derivative term
+                const d_term = this.kd * (error - this.prevError) / this.dt;
+                
+                // Total output
+                const output = p_term + i_term + d_term;
+                
+                // Update for next iteration
+                this.prevError = error;
+                
+                // Store for display
+                this.pTerm = p_term;
+                this.iTerm = i_term;
+                this.dTerm = d_term;
+                
+                return output;
+            }
+            
+            reset() {
+                this.integral = 0;
+                this.prevError = 0;
+            }
+            
+            setGains(kp, ki, kd) {
+                this.kp = kp;
+                this.ki = ki;
+                this.kd = kd;
+            }
+        }
+
+        // Ball chase simulation with PID
+        class PIDSimulation {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                
+                this.centerX = canvas.width / 2;
+                this.centerY = canvas.height / 2;
+                this.radius = 120;
+                
+                // Blue ball (target) - moves in circle
+                this.blueAngle = 0;
+                this.blueSpeed = 0.008; // radians per frame
+                this.blueBallRadius = 12;
+                // Blue ball linear speed: radius * angular_speed
+                this.blueLinearSpeed = this.radius * this.blueSpeed; // ~0.96 pixels per frame
+                
+                // Red ball (hunter) - same linear speed as blue ball
+                this.redX = this.centerX - this.radius;
+                this.redY = this.centerY;
+                this.redBallRadius = 12;
+                this.redLinearSpeed = this.blueLinearSpeed; // Match blue ball speed!
+                
+                // Tracking
+                this.caught = false;
+                this.caughtTime = 0;
+                this.catchDistance = 25;
+                
+                this.blueTrail = [];
+                this.redTrail = [];
+                
+                this.running = true;
+                
+                this.animate();
+            }
+            
+            update() {
+                // Update blue ball position (circular motion)
+                this.blueAngle += this.blueSpeed;
+                const blueX = this.centerX + this.radius * Math.cos(this.blueAngle);
+                const blueY = this.centerY + this.radius * Math.sin(this.blueAngle);
+                
+                // Predict where blue ball will be (several frames ahead)
+                const predictFrames = 10;
+                const futureAngle = this.blueAngle + this.blueSpeed * predictFrames;
+                const futureBluex = this.centerX + this.radius * Math.cos(futureAngle);
+                const futureBlueY = this.centerY + this.radius * Math.sin(futureAngle);
+                
+                // Calculate direction from red ball to predicted blue ball position
+                const dx = futureBluex - this.redX;
+                const dy = futureBlueY - this.redY;
+                const distance = Math.sqrt(dx**2 + dy**2);
+                
+                // Normalize to get direction (unit vector)
+                let dirX = 0, dirY = 0;
+                if (distance > 0) {
+                    dirX = dx / distance;
+                    dirY = dy / distance;
+                }
+                
+                // Red ball moves at constant linear speed in the direction of target
+                // Speed same as blue ball: radius * angular_speed
+                this.redX += dirX * this.blueLinearSpeed;
+                this.redY += dirY * this.blueLinearSpeed;
+                
+                // Check if caught (using actual current position)
+                const catchDist = Math.sqrt(
+                    (blueX - this.redX) ** 2 + 
+                    (blueY - this.redY) ** 2
+                );
+                
+                if (catchDist < this.catchDistance) {
+                    this.caught = true;
+                    this.caughtTime = 60; // Show caught message for 1 second
+                }
+                
+                if (this.caught) {
+                    this.caughtTime--;
+                    if (this.caughtTime <= 0) {
+                        this.caught = false;
+                    }
+                }
+                
+                // Store trails
+                this.blueTrail.push({ x: blueX, y: blueY });
+                this.redTrail.push({ x: this.redX, y: this.redY });
+                
+                if (this.blueTrail.length > 200) {
+                    this.blueTrail.shift();
+                    this.redTrail.shift();
+                }
+                
+                // Store current positions for display
+                this.blueX = blueX;
+                this.blueY = blueY;
+                this.distance = catchDist;
+                this.errorX = dx;
+                this.errorY = dy;
+            }
+            
+            draw() {
+                // Clear canvas
+                this.ctx.fillStyle = '#1a1a2e';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw circular path
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Draw center point
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Draw trails
+                this.drawTrail(this.blueTrail, '#3498db');
+                this.drawTrail(this.redTrail, '#e74c3c');
+                
+                // Draw balls
+                this.drawBall(this.blueX, this.blueY, this.blueBallRadius, '#3498db');
+                this.drawBall(this.redX, this.redY, this.redBallRadius, '#e74c3c');
+                
+                // Draw caught indicator
+                if (this.caught || this.caughtTime > 0) {
+                    this.ctx.fillStyle = 'rgba(255, 165, 0, 0.7)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(
+                        this.blueX, this.blueY,
+                        this.blueBallRadius + 10, 0, Math.PI * 2
+                    );
+                    this.ctx.stroke();
+                    this.ctx.strokeStyle = '#ff9800';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.stroke();
+                }
+            }
+            
+            drawTrail(trail, color) {
+                if (trail.length < 2) return;
+                
+                this.ctx.strokeStyle = color;
+                this.ctx.lineWidth = 1.5;
+                this.ctx.globalAlpha = 0.3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(trail[0].x, trail[0].y);
+                
+                for (let i = 1; i < trail.length; i++) {
+                    this.ctx.lineTo(trail[i].x, trail[i].y);
+                }
+                this.ctx.stroke();
+                this.ctx.globalAlpha = 1.0;
+            }
+            
+            drawBall(x, y, radius, color) {
+                // Ball shadow
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x, y + radius + 5, radius, radius * 0.3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Ball
+                this.ctx.fillStyle = color;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Highlight
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                this.ctx.beginPath();
+                this.ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            animate() {
+                if (this.running) {
+                    this.update();
+                }
+                this.draw();
+                this.updateStats();
+                requestAnimationFrame(() => this.animate());
+            }
+            
+            updateStats() {
+                document.getElementById('blueX').textContent = this.blueX.toFixed(1);
+                document.getElementById('blueY').textContent = this.blueY.toFixed(1);
+                document.getElementById('redX').textContent = this.redX.toFixed(1);
+                document.getElementById('redY').textContent = this.redY.toFixed(1);
+                document.getElementById('distance').textContent = this.distance.toFixed(1);
+                document.getElementById('radius').textContent = this.radius.toFixed(0);
+                document.getElementById('speedValue').textContent = this.blueLinearSpeed.toFixed(2) + ' px/f';
+                
+                const status = document.getElementById('status');
+                if (this.caught || this.caughtTime > 0) {
+                    status.textContent = '🎉 Caught! ✨';
+                    status.classList.add('caught');
+                } else {
+                    status.textContent = '🎯 Chasing...';
+                    status.classList.remove('caught');
+                }
+            }
+            
+            reset() {
+                this.blueAngle = 0;
+                this.redX = this.centerX - this.radius;
+                this.redY = this.centerY;
+                this.caught = false;
+                this.caughtTime = 0;
+                this.blueTrail = [];
+                this.redTrail = [];
+            }
+            
+            togglePause() {
+                this.running = !this.running;
+            }
+            
+            setRadius(radius) {
+                this.radius = radius;
+                this.blueLinearSpeed = this.radius * this.blueSpeed;
+                this.redLinearSpeed = this.blueLinearSpeed;
+                this.reset();
+            }
+        }
+
+        // Initialize
+        const canvas = document.getElementById('canvas');
+        const simulation = new PIDSimulation(canvas);
+        
+        // Event listeners
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            simulation.reset();
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', (e) => {
+            simulation.togglePause();
+            e.target.textContent = simulation.running ? '⏸️ Pause' : '▶️ Resume';
+        });
+        
+        document.getElementById('radiusSlider').addEventListener('input', (e) => {
+            const radius = parseFloat(e.target.value);
+            simulation.setRadius(radius);
+            document.getElementById('radiusValue').textContent = radius;
+        });
+    </script>
+</body>
+</html>
