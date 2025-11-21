@@ -1,33 +1,35 @@
-# Self-Driving Car Control Systems
+# Self-Driving Car Course: Autonomous Vehicle Systems Engineering
 
-Interactive visualizations demonstrating control systems algorithms applied to autonomous tracking. Watch a red ball intelligently chase a blue ball using two fundamental approaches: **Kalman Filter** (optimal state estimation) and **PID Controller** (feedback control).
+A comprehensive 15-week course on autonomous vehicle systems, from fundamentals to advanced topics. This repository contains interactive Jupyter notebooks, demonstrations, and complete implementations of key algorithms.
 
 ## 🎯 Overview
 
-This project provides educational simulations of autonomous tracking algorithms, commonly used in:
-- Self-driving vehicles
-- Robotics and drone navigation
-- Target tracking systems
-- Industrial automation
-
-Both implementations simulate a "hunter" (red ball) pursuing a "target" (blue ball) moving in a circular path, showcasing different algorithmic approaches to the same problem.
+This educational project provides hands-on learning for autonomous vehicle technologies, including:
+- Self-driving vehicle algorithms and architectures
+- Control systems (PID, MPC, Pure Pursuit, Stanley)
+- State estimation (Kalman Filter, Particle Filter)
+- Path planning and trajectory optimization
+- Sensor fusion and perception
+- Functional safety and testing
 
 ## 📁 Project Structure
 
-### HTML Visualizations (Browser-Based)
+### Interactive Demonstrations
+
+#### HTML Visualizations (Browser-Based, No Installation Required)
 - **`kalman_ball_chase.html`** - Kalman Filter implementation with predictive state estimation
 - **`pid_ball_chase.html`** - PID Controller implementation with feedback control
 
-### Jupyter Notebooks (Python-Based)
+Simply open these files in any modern web browser to see the algorithms in action!
 
-#### Core Demonstrations
+#### Core Jupyter Notebooks
 - **`kalman_ball_chase.ipynb`** - Interactive notebook with Kalman Filter animation
   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/kalman_ball_chase.ipynb)
 
 - **`pid_ball_chase.ipynb`** - Interactive notebook with PID Controller animation
   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/pid_ball_chase.ipynb)
 
-#### Course Notebooks (15-Week Curriculum)
+### 15-Week Course Curriculum
 
 | Module | Week | Topic | Open in Colab |
 |--------|------|-------|---------------|
@@ -47,14 +49,11 @@ Both implementations simulate a "hunter" (red ball) pursuing a "target" (blue ba
 | | 14 | Connected & Cooperative Driving | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week14_connected_cooperative_driving.ipynb) |
 | | 15 | Final Project Presentation | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adiel2012/self-driving-car/blob/main/week15_final_project_presentation.ipynb) |
 
-### Documentation
-- **`CLAUDE.md`** - Technical documentation for developers and Claude Code
-
 ## 🚀 Quick Start
 
-### Option 1: Browser (No Installation)
+### Option 1: Browser Demonstrations (No Installation)
 
-Simply open the HTML files directly in any modern web browser:
+Open the HTML files directly in any modern web browser:
 
 ```bash
 # Windows
@@ -67,286 +66,358 @@ open kalman_ball_chase.html
 xdg-open kalman_ball_chase.html
 ```
 
-No build process, no dependencies, no server required!
-
 ### Option 2: Jupyter Notebooks (Local)
 
-Requires Python with Jupyter:
+Requires Python 3.8+ with Jupyter:
 
 ```bash
 # Install dependencies
-pip install numpy matplotlib ipywidgets jupyter
+pip install numpy matplotlib ipywidgets jupyter scipy
 
 # Launch notebook
-jupyter notebook kalman_ball_chase.ipynb
+jupyter notebook week01_introduction_to_autonomy.ipynb
 ```
 
-Then execute all cells to see the interactive animation.
+### Option 3: Google Colab (Cloud-Based, Zero Setup)
 
-### Option 3: Google Colab (Cloud-Based, No Installation)
+Click any "Open in Colab" badge above to run notebooks directly in your browser!
 
-Click the "Open in Colab" badges above to run the notebooks directly in your browser with zero setup!
+## 📚 Course Syllabus
 
-## 🧮 Algorithms Explained
-
-### Kalman Filter
-**Purpose:** Optimal state estimation from noisy measurements
-
-The Kalman filter operates in two phases:
-1. **PREDICT:** Use physics model to predict future state
-2. **UPDATE:** Correct prediction using noisy measurements
-
-**Key Features:**
-- Estimates both position AND velocity from position-only measurements
-- Automatically balances trust between predictions and measurements
-- Mathematically optimal under Gaussian noise assumptions
-- Smooths out measurement noise
-
-**Mathematical Foundation:**
-```
-State vector: [x, y, vx, vy]  (4D)
-Measurement: [x_noisy, y_noisy]  (2D)
-
-Prediction: x̂⁻(k) = F·x̂(k-1)
-           P⁻(k) = F·P(k-1)·Fᵀ + Q
-
-Update: K(k) = P⁻(k)·Hᵀ·[H·P⁻(k)·Hᵀ + R]⁻¹  (Kalman Gain)
-        x̂(k) = x̂⁻(k) + K(k)·[z(k) - H·x̂⁻(k)]
-        P(k) = (I - K(k)·H)·P⁻(k)
-```
-
-### PID Controller
-**Purpose:** Minimize tracking error through feedback control
-
-The PID controller combines three feedback terms:
-1. **P (Proportional):** React to current error
-2. **I (Integral):** Eliminate accumulated error over time
-3. **D (Derivative):** Dampen oscillations by responding to error rate
-
-**Key Features:**
-- Simple three-parameter tuning (Kp, Ki, Kd)
-- No system model required
-- Robust to disturbances
-- 70+ years of proven industrial use
-
-**Mathematical Foundation:**
-```
-Control Law: u(t) = Kp·e(t) + Ki·∫e(τ)dτ + Kd·de(t)/dt
-
-Where:
-- e(t) = target - current (error)
-- Kp = proportional gain (immediate response)
-- Ki = integral gain (eliminates steady-state error)
-- Kd = derivative gain (reduces overshoot)
-```
-
-## 🎮 Interactive Controls
-
-### HTML Versions
-- **Reset** - Restart simulation from initial positions
-- **Pause/Resume** - Freeze/unfreeze animation
-- **Measurement Noise Slider** (Kalman only) - Adjust sensor noise (1-150)
-- **Circle Radius Slider** - Change target's circular path radius (50-200 pixels)
-
-### Jupyter Versions
-Same controls implemented using `ipywidgets` for interactive manipulation within notebooks.
-
-## 📊 Visualization Features
-
-Both implementations display:
-- **Blue Ball** - Target moving in circular path
-- **Red Ball** - Hunter attempting to catch the target
-- **Circular Path** - Dashed white circle showing target trajectory
-- **Motion Trails** - Colored trails showing recent movement history
-- **Prediction Indicator** (Kalman only) - Green dot showing predicted future position
-- **Catch Indicator** - Orange highlight when hunter catches target
-
-## 🧪 Experiment Ideas
-
-### Kalman Filter
-1. **Increase measurement noise** - Watch how the filter smooths noisy data
-2. **Change radius** - See how prediction adapts to different motion scales
-3. **Observe the green prediction dot** - Notice how it leads the blue ball
-
-### PID Controller
-1. **Adjust radius** - See how the predictive steering adapts
-2. **Watch convergence** - Notice how the red ball intercepts the path
-3. **Compare with Kalman** - Run both side-by-side to see differences
-
-## 📚 Educational Value
-
-This project demonstrates:
-
-### Control Theory Concepts
-- State estimation vs. feedback control
-- Prediction and correction cycles
-- Noise handling and filtering
-- Real-time control algorithms
-
-### Mathematical Foundations
-- Linear algebra (matrix operations)
-- Probability theory (Gaussian distributions)
-- Calculus (derivatives and integrals)
-- Optimization (minimizing error)
-
-### Practical Applications
-- Autonomous vehicle path planning
-- Sensor fusion in robotics
-- Target tracking in defense systems
-- Industrial process control
-
-## 🔍 Technical Details
-
-### Ball Physics
-- **Target (Blue):** Moves at constant angular velocity (0.008 rad/frame)
-- **Hunter (Red):** Matches target's linear speed (~0.96 pixels/frame)
-- **Frame Rate:** ~60 FPS (0.016 seconds per frame)
-- **Catch Distance:** 25 pixels
-
-### Kalman Filter Parameters
-- **Process Noise Q:** Controls trust in motion model
-- **Measurement Noise R:** Controls trust in sensor readings
-- **State Dimension:** 4 (x, y, vx, vy)
-- **Measurement Dimension:** 2 (x, y)
-
-### PID Controller Parameters
-- **Kp:** 0.1 (proportional gain)
-- **Ki:** 0.02 (integral gain)
-- **Kd:** 0.15 (derivative gain)
-- **Anti-windup:** Integral clamped to ±1000
-
-## 🎓 When to Use Each Algorithm
-
-### Use Kalman Filter When:
-- ✅ Measurements are very noisy
-- ✅ You need to estimate hidden states (like velocity from position)
-- ✅ System dynamics are well-understood and linear
-- ✅ You want mathematical optimality guarantees
-- ✅ Computational resources are available (O(n³) complexity)
-
-### Use PID Controller When:
-- ✅ You need simple, fast control
-- ✅ System is well-behaved and easily controllable
-- ✅ Measurements are relatively clean
-- ✅ Computational constraints exist (O(1) complexity)
-- ✅ System dynamics are unknown or hard to model
-
-### Use Both Together:
-- 🎯 Kalman filter estimates true state from noisy sensors
-- 🎯 PID controller generates control commands based on estimates
-- 🎯 Best of both worlds: optimal estimation + robust control
-
-## 🛠️ Technology Stack
-
-### HTML Versions
-- Pure JavaScript (ES6+)
-- HTML5 Canvas API for graphics
-- MathJax 3.2.2 for LaTeX rendering
-- No external dependencies (runs offline)
-
-### Jupyter Versions
-- Python 3.8+
-- NumPy (matrix operations)
-- Matplotlib (visualization and animation)
-- ipywidgets (interactive controls)
-- Jupyter Notebook
-
-## 🎓 Course Syllabus: Autonomous Vehicle Systems Engineering
-
-This project serves as supplementary material for the following advanced course curriculum:
-
-### Course Overview
+### **Autonomous Vehicle Systems Engineering**
 
 | **Aspect** | **Detail** |
 |------------|------------|
 | **Course Name** | Autonomous Vehicle Systems Engineering: From Sensor to Control |
 | **Course Number** | AVSE 501 / CS 4XX |
 | **Credits** | 3.0 |
-| **Prerequisites** | Proficiency in Python (and/or C++), Linear Algebra, Calculus, and Basic Probability/Statistics. Prior exposure to basic Control Systems or Machine Learning is recommended. |
-| **Primary Tools** | ROS (Robot Operating System), Python, C++, CARLA/Gazebo Simulation Environment, NumPy. |
-
-### 🎯 Course Goals
-
-- Understand the full software and hardware stack of a modern Level 4 Autonomous Vehicle (AV)
-- Master the core algorithms for Perception, Localization, Planning, and Control
-- Develop and implement key AV algorithms in a realistic simulation environment
-- Analyze and address the critical challenges of functional safety and reliability
-
-### 📚 Weekly Course Schedule
-
-#### **Module I: Introduction & Foundations (Weeks 1-3)**
-
-| Week | Topic | Key Concepts & Deliverables |
-|------|-------|----------------------------|
-| **1** | Introduction to Autonomy | SAE J3016 Levels of Driving Automation; History and Landscape of AVs; The Sense-Plan-Act Paradigm; System Architecture (hardware/software). |
-| **2** | Vehicle Dynamics & Kinematics | Vehicle Modeling (Kinematic Bicycle Model, Dynamic Bicycle Model); Coordinate Frames and Transformations; Ackermann Steering Geometry. |
-| **3** | Control Theory & Actuation | Drive-by-Wire systems; Longitudinal Control (PID, Cruise Control); Lateral Control (Pure Pursuit, Stanley Method). |
-
-#### **Module II: Perception & Localization (Weeks 4-7)**
-
-| Week | Topic | Key Concepts & Deliverables |
-|------|-------|----------------------------|
-| **4** | Sensor Technologies & Fusion | Camera (Image Processing, Homography); LiDAR (Point Clouds, Range Data); Radar (Doppler effects); Sensor Synchronization and Calibration. |
-| **5** | Deep Learning for Perception | Object Detection (YOLO, R-CNN); Semantic Segmentation (identifying road, lane lines); Tracking and Prediction (Multi-Object Tracking - MOT). |
-| **6** | Probabilistic State Estimation | Modeling Uncertainty; Bayes Filter fundamentals; Introduction to Kalman Filters (Linear, Extended, Unscented) for tracking. |
-| **7** | Localization and Mapping | Global Navigation Satellite Systems (GNSS/GPS); Simultaneous Localization and Mapping (SLAM); Particle Filters for Global Localization; High-Definition (HD) Map representation. |
-
-#### **Module III: Planning & Decision Making (Weeks 8-11)**
-
-| Week | Topic | Key Concepts & Deliverables |
-|------|-------|----------------------------|
-| **8** | Mission & Behavior Planning | Route Planning (Dijkstra, A* search on road network graphs); Finite State Machines (FSM) for Decision Making (e.g., lane change, stop, wait). |
-| **9** | Local Motion Planning | Sampling-based Planners (RRT/RRT*); Search-based Planners (State Lattice); Generating a collision-free path. |
-| **10** | Trajectory Optimization | Cost Functions (smoothness, speed, safety); Model Predictive Control (MPC) for planning and control integration; Real-time constraints. |
-| **11** | Prediction and Interaction | Modeling driver behavior; Predicting the trajectories of other agents; Game Theory and Reinforcement Learning for complex intersections. |
-
-#### **Module IV: Safety, Testing, & The Future (Weeks 12-15)**
-
-| Week | Topic | Key Concepts & Deliverables |
-|------|-------|----------------------------|
-| **12** | Functional Safety & Redundancy | ISO 26262 framework; Redundant systems (steering, braking, compute); Fail-Operational vs. Fail-Safe design; Safety of the Intended Functionality (SOTIF). |
-| **13** | Testing, Validation, & Ethics | Hardware-in-the-Loop (HIL) and Software-in-the-Loop (SIL) simulation; Edge Cases and Scenario Testing; AV Ethics (Liability, The Trolley Problem). |
-| **14** | Connected & Cooperative Driving | Vehicle-to-Everything (V2X) Communication (V2V, V2I); Utilizing cloud computing; Over-the-Air (OTA) updates. |
-| **15** | Final Project Presentation | Student presentations and live demonstrations of final projects. |
-
-### 🔗 How This Project Fits
-
-This repository specifically covers:
-- **Week 3:** Control Theory & Actuation (PID Controller implementation)
-- **Week 6:** Probabilistic State Estimation (Kalman Filter implementation)
-
-The interactive simulations and Jupyter notebooks provide hands-on experience with these fundamental algorithms before applying them to full-scale autonomous vehicle systems.
+| **Prerequisites** | Python proficiency, Linear Algebra, Calculus, Basic Probability/Statistics. Recommended: Control Systems or Machine Learning background. |
+| **Tools** | Python, NumPy, Matplotlib, ROS (optional), CARLA/Gazebo (optional) |
 
 ---
 
-## 📖 Further Reading
+### 🎯 Course Goals
 
-### Kalman Filter
-- Rudolf E. Kalman, "A New Approach to Linear Filtering and Prediction Problems" (1960)
-- [Wikipedia: Kalman Filter](https://en.wikipedia.org/wiki/Kalman_filter)
-- Applications: GPS, spacecraft navigation, signal processing
+By the end of this course, students will be able to:
 
-### PID Controller
-- [Wikipedia: PID Controller](https://en.wikipedia.org/wiki/PID_controller)
-- Ziegler-Nichols tuning method
-- Applications: Thermostats, cruise control, manufacturing
+1. **Understand** the complete software and hardware stack of modern Level 4 Autonomous Vehicles
+2. **Implement** core algorithms for Perception, Localization, Planning, and Control
+3. **Analyze** functional safety requirements and redundancy strategies
+4. **Evaluate** autonomous vehicle systems through testing and validation
+5. **Apply** learned concepts to build a comprehensive final project
+
+---
+
+### 📖 Weekly Breakdown
+
+#### **Module I: Introduction & Foundations (Weeks 1-3)**
+
+**Week 1: Introduction to Autonomy**
+- SAE J3016 Levels of Driving Automation (L0-L5)
+- History: DARPA Grand Challenge to modern deployments
+- Sense-Plan-Act paradigm
+- System architecture (sensors, compute, actuators)
+- Industry landscape (Waymo, Cruise, Tesla, etc.)
+
+**Week 2: Vehicle Dynamics & Kinematics**
+- Kinematic bicycle model for motion planning
+- Dynamic bicycle model with tire forces
+- Coordinate frame transformations (2D/3D)
+- Ackermann steering geometry
+- Implementation: Vehicle trajectory simulation
+
+**Week 3: Control Theory & Actuation**
+- Drive-by-Wire systems (steer, throttle, brake)
+- PID controllers for longitudinal control (cruise control)
+- Lateral control: Pure Pursuit algorithm
+- Lateral control: Stanley method (DARPA Grand Challenge)
+- Adaptive Cruise Control (ACC) with gap control
+
+---
+
+#### **Module II: Perception & Localization (Weeks 4-7)**
+
+**Week 4: Sensor Technologies & Fusion**
+- Camera: Image processing, homography, calibration
+- LiDAR: Point clouds, range data, registration
+- Radar: Doppler velocity, weather robustness
+- Sensor synchronization and extrinsic calibration
+- Early/late fusion strategies
+
+**Week 5: Deep Learning for Perception**
+- Object detection: YOLO, Faster R-CNN, PointNet
+- Semantic segmentation for drivable area
+- Lane detection algorithms
+- Multi-Object Tracking (MOT)
+- Challenges: Occlusions, adverse weather
+
+**Week 6: Probabilistic State Estimation**
+- Modeling uncertainty (Gaussian distributions)
+- Bayes filter fundamentals
+- Kalman Filter (linear systems)
+- Extended Kalman Filter (EKF) for nonlinear systems
+- Unscented Kalman Filter (UKF)
+- Implementation: Vehicle tracking with noisy GPS
+
+**Week 7: Localization and Mapping**
+- GPS/GNSS: Accuracy and limitations
+- IMU integration for dead reckoning
+- Particle Filter for global localization
+- SLAM (Simultaneous Localization and Mapping)
+- HD Maps: Representation and use
+- Implementation: Monte Carlo Localization
+
+---
+
+#### **Module III: Planning & Decision Making (Weeks 8-11)**
+
+**Week 8: Mission & Behavior Planning**
+- Route planning: Dijkstra, A* on road graphs
+- Finite State Machines (FSM) for decision-making
+- Behavior trees for complex logic
+- Lane change decision-making
+- Intersection handling
+
+**Week 9: Local Motion Planning**
+- Configuration space and obstacles
+- Sampling-based planners: RRT, RRT*
+- Search-based planners: State lattice, hybrid A*
+- Collision checking (bounding boxes, separating axis)
+- Implementation: RRT path planning
+
+**Week 10: Trajectory Optimization**
+- Cost functions: Smoothness, speed, safety
+- Polynomial trajectory generation
+- Model Predictive Control (MPC)
+- Convex optimization (CVXPY)
+- Real-time constraints and approximations
+- Implementation: MPC for path tracking
+
+**Week 11: Prediction and Interaction**
+- Trajectory prediction: Constant velocity, CTRV models
+- Social LSTM for pedestrian prediction
+- Game theory for intersection scenarios
+- Reinforcement Learning (Q-Learning) for highway merging
+- Multi-agent coordination
+
+---
+
+#### **Module IV: Safety, Testing, & The Future (Weeks 12-15)**
+
+**Week 12: Functional Safety & Redundancy**
+- ISO 26262 functional safety standard
+- ASIL ratings (Automotive Safety Integrity Level)
+- Hazard Analysis and Risk Assessment (HARA)
+- Redundant systems: Dual sensors, fail-operational designs
+- SOTIF (Safety of the Intended Functionality)
+- Implementation: ASIL calculator, fault tree analysis
+
+**Week 13: Testing, Validation, & Ethics**
+- Verification vs. Validation
+- X-in-the-Loop: MiL, SiL, HiL, ViL
+- Scenario-based testing and edge cases
+- Simulation environments (CARLA, LGSVL)
+- AV Ethics: Trolley problem, liability, transparency
+- Implementation: SIL testing framework
+
+**Week 14: Connected & Cooperative Driving**
+- V2X communication: V2V, V2I, V2P, V2N
+- DSRC vs. C-V2X technology comparison
+- Cooperative Adaptive Cruise Control (CACC)
+- Platooning for fuel efficiency
+- Cloud computing and edge computing
+- Over-the-Air (OTA) software updates
+- Cybersecurity: Attack vectors and defenses
+- Implementation: V2X network simulator, CACC platoon
+
+**Week 15: Final Project Presentation**
+- Students present integrated AV projects
+- Example projects: Autonomous parking, highway pilot, intersection navigation
+- Live demonstrations and Q&A
+- Peer evaluation
+
+---
+
+## 🧮 Key Algorithms Implemented
+
+### State Estimation
+- **Kalman Filter**: Optimal estimation for linear systems
+- **Extended Kalman Filter (EKF)**: Nonlinear state estimation
+- **Particle Filter**: Global localization with multimodal distributions
+
+### Control
+- **PID Controller**: Classic feedback control for speed/steering
+- **Pure Pursuit**: Geometric path tracking
+- **Stanley Method**: DARPA Grand Challenge winning controller
+- **Model Predictive Control (MPC)**: Optimization-based trajectory tracking
+
+### Planning
+- **A* Search**: Optimal graph-based route planning
+- **RRT/RRT***: Sampling-based motion planning
+- **Trajectory Optimization**: Smooth, safe path generation
+
+### Perception & Prediction
+- **Multi-Object Tracking**: Kalman Filter + Hungarian algorithm
+- **Trajectory Prediction**: Motion models (CV, CA, CTRV)
+- **Q-Learning**: Reinforcement learning for decision-making
+
+### Safety & Testing
+- **ASIL Calculator**: ISO 26262 safety integrity assessment
+- **HARA**: Hazard analysis methodology
+- **Redundancy Analysis**: Monte Carlo reliability simulation
+
+---
+
+## 🎮 Interactive Features
+
+All notebooks include:
+- **Live visualizations** with matplotlib animations
+- **Interactive controls** using ipywidgets
+- **Step-by-step explanations** with mathematical derivations
+- **Practical exercises** with solution templates
+- **Comprehensive references** (400+ academic papers and resources)
+
+---
+
+## 🧪 Hands-On Projects
+
+### Demonstrations
+1. **Ball Chase Simulations**: Kalman Filter vs. PID control comparison
+2. **Vehicle Trajectory Tracking**: Multiple control strategies
+3. **CACC Platoon**: Cooperative driving with V2X communication
+4. **Lane Keeping System**: Integrated perception-planning-control
+
+### Exercises (60+ total across all weeks)
+- PID tuning for cruise control
+- Coordinate transformations for sensor fusion
+- Path planning with RRT
+- MPC trajectory optimization
+- HARA safety analysis
+- Scenario-based testing design
+
+---
+
+## 📊 Visualization Examples
+
+The course includes rich visualizations:
+- Vehicle motion with kinematic bicycle model
+- Kalman Filter prediction and update steps
+- Path planning algorithms (A*, RRT)
+- Control performance comparison (tracking error, steering smoothness)
+- Safety metrics (ASIL determination, fault trees)
+- Multi-agent scenarios (intersection navigation, platooning)
+
+---
+
+## 🛠️ Technology Stack
+
+### Required
+- **Python 3.8+**
+- **NumPy**: Matrix operations and numerical computing
+- **Matplotlib**: Visualization and animation
+- **SciPy**: Optimization and scientific computing
+
+### Optional (for advanced topics)
+- **CVXPY**: Convex optimization for MPC
+- **ROS**: Robot Operating System (for real hardware integration)
+- **CARLA/Gazebo**: 3D simulation environments
+
+### HTML Demonstrations
+- Pure JavaScript (ES6+)
+- HTML5 Canvas API
+- MathJax 3.2 for LaTeX rendering
+- Zero dependencies (runs offline)
+
+---
+
+## 📖 Learning Resources
+
+### Textbooks (Referenced in Course)
+1. **Probabilistic Robotics** by Thrun, Burgard & Fox - State estimation and SLAM
+2. **Planning Algorithms** by LaValle - Comprehensive planning coverage
+3. **Vehicle Dynamics and Control** by Rajamani - Vehicle modeling and control
+
+### Papers (400+ citations across all notebooks)
+- Kalman (1960): Original Kalman Filter paper
+- Thrun et al. (2006): Stanley (DARPA Grand Challenge winner)
+- Paden et al. (2016): Survey of AV motion planning and control
+- ISO 26262 (2018): Functional safety standard
+
+### Online Resources
+- Udacity Self-Driving Car Nanodegree
+- MIT 6.S094: Deep Learning for Self-Driving Cars
+- Coursera: Self-Driving Cars Specialization (University of Toronto)
+- Apollo Auto and Autoware open-source platforms
+
+---
+
+## 🎓 Prerequisites
+
+**Required:**
+- Python programming (functions, classes, NumPy)
+- Linear algebra (vectors, matrices, transformations)
+- Calculus (derivatives, integrals, optimization)
+- Basic probability (Gaussian distributions, Bayes' theorem)
+
+**Recommended:**
+- Control systems (transfer functions, feedback loops)
+- Machine learning (neural networks, training)
+- Computer vision basics
+- Robotics fundamentals
+
+---
 
 ## 🤝 Contributing
 
-This is an educational project. Feel free to:
-- Experiment with parameters
-- Add new visualization features
-- Implement variants (Extended Kalman Filter, Adaptive PID, etc.)
-- Create additional examples
+This is an educational project. Contributions welcome:
+- Add new algorithm implementations
+- Improve visualizations
+- Create additional exercises
+- Fix bugs or typos
+- Enhance documentation
+
+---
 
 ## 📄 License
 
 Open source educational project. Use freely for learning and teaching purposes.
 
+---
+
 ## 🙏 Acknowledgments
 
-Built to demonstrate fundamental control theory concepts through interactive visualization. Mathematical implementations follow standard textbook algorithms used in robotics, aerospace, and autonomous systems.
+Course content developed using standard autonomous vehicle algorithms from academic research and industry practice. Special thanks to the autonomous vehicle research community for open publications and datasets.
+
+Key datasets used:
+- KITTI Vision Benchmark Suite
+- nuScenes (Waymo, Motional)
+- Waymo Open Dataset
 
 ---
 
-**Happy Learning! 🚀** Experiment with the controls and watch how these algorithms power real-world autonomous systems!
+## 🚀 Getting Started
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/adiel2012/self-driving-car.git
+   cd self-driving-car
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Start with Week 1**:
+   ```bash
+   jupyter notebook week01_introduction_to_autonomy.ipynb
+   ```
+
+4. **Or try the browser demos**:
+   - Open `kalman_ball_chase.html` or `pid_ball_chase.html` directly
+
+---
+
+**Happy Learning! 🚗💨**
+
+Master the algorithms that power modern autonomous vehicles through hands-on implementation and interactive exploration!
