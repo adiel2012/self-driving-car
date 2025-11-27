@@ -82,6 +82,11 @@ jupyter notebook week01_introduction_to_autonomy.ipynb
 
 Click any "Open in Colab" badge above to run notebooks directly in your browser!
 
+**For Google Colab users:**
+- See [COLAB_SETUP.md](COLAB_SETUP.md) for setup instructions and optimization tips
+- See [MEMORY_TIPS.md](MEMORY_TIPS.md) for memory management strategies
+- Notebooks are optimized for Colab's memory limits (12.7 GB RAM)
+
 ## 📚 Course Syllabus
 
 ### **Autonomous Vehicle Systems Engineering**
@@ -271,11 +276,19 @@ By the end of this course, students will be able to:
 ## 🎮 Interactive Features
 
 All notebooks include:
-- **Live visualizations** with matplotlib animations
+- **Live visualizations** with matplotlib animations (20+ plots per notebook)
 - **Interactive controls** using ipywidgets
 - **Step-by-step explanations** with mathematical derivations
-- **Practical exercises** with solution templates
+- **Practical exercises** with detailed solutions
 - **Comprehensive references** (400+ academic papers and resources)
+- **Performance analysis** with statistical comparisons
+- **Parameter sensitivity studies** for algorithm tuning
+
+### 🆕 Recent Enhancements
+- ✅ **Exercise Solutions**: Complete solutions added for Week 6 (Kalman Filters) and Week 9 (RRT*)
+- ✅ **Google Colab Optimization**: Memory-optimized code for stable execution (93% iteration reduction in Week 9)
+- ✅ **Enhanced Visualizations**: Convergence plots, box plots, parameter sensitivity analysis
+- ✅ **Advanced Implementations**: Extended Kalman Filter, Unscented Kalman Filter, Dynamic RRT with moving obstacles
 
 ---
 
@@ -294,6 +307,11 @@ All notebooks include:
 - MPC trajectory optimization
 - HARA safety analysis
 - Scenario-based testing design
+
+**Exercise Solutions Available:**
+- ✅ **Week 6**: 1D Kalman Filter, KF/EKF/UKF comparison with comprehensive analysis
+- ✅ **Week 9**: RRT* convergence analysis, dynamic obstacle planning with space-time RRT
+- Additional solutions included at the end of relevant notebooks after exercises
 
 ---
 
